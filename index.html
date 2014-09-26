@@ -1,0 +1,500 @@
+<!doctype html>
+
+<title>Meta-analogies (rocks)</title>
+<script src='d3.min.js'></script>
+<script src='settings.js'></script>
+<script src='rock.js'></script>
+<script src='support-category.js'></script>
+
+<body>
+</body>
+
+<script>
+
+var collection = new RockCollection();
+collection.extendCollection(rockSetupData);
+var exampleCollection = new RockCollection();
+exampleCollection.extendCollection(exampleRockSetupData);
+
+var setupBoard = function() {
+	var svg = d3.select('body').append('svg')
+		.attr('id', 'board')
+		.attr('width', boardWidth)
+		.attr('height', boardHeight);
+		//.style({ display:'block', margin:'auto', padding:'0' });
+
+	svg.append('rect')
+	   .style('fill', boardColor)
+	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'});
+}
+
+var setupButtonZone = function() {
+	var svg = d3.select('#board').append('svg')
+		 .attr('id', 'buttonZone')
+	   .style('fill', boardColor)
+	   .attr({width: buttonZoneWidth, height: buttonZoneHeight})
+	   .attr({x: buttonZoneX, y: buttonZoneY});
+
+	svg.append('rect')
+	   .style('fill', boardColor)
+	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
+}
+
+var setupControlRockZone = function() {
+	d3.select('#board').append('rect')
+		 .attr('id', 'controlZone')
+	   .style('fill', boardColor)
+	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: correctColor})
+	   .attr({x: controlRockZoneX, y: controlRockZoneY});
+}
+
+var setupUserRockZone = function() {
+	d3.select('#board').append('rect')
+		 .attr('id', 'userZone')
+	   .style('fill', boardColor)
+	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
+	   .attr({x: userRockZoneX, y: userRockZoneY});
+}
+
+setupBoard();
+setupButtonZone();
+setupControlRockZone();
+setupUserRockZone();
+
+var setupColorButton = function() {
+	var buttonZone = d3.select('#buttonZone');
+	var button = buttonZone.append('g')
+				.attr('id', 'colorButton');
+  button.append('rect')
+		.attr('id', 'colorButtonRect')
+		.style({fill: buttonColor})
+		.attr('width', buttonWidth)
+		.attr('height', buttonHeight)
+		.attr({x: colorButtonX, y: colorButtonY});
+	button.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
+		.attr({x: colorButtonX+10, y: colorButtonY+15})
+		.text('Color');
+}
+
+var setupShapeButton = function() {
+	var buttonZone = d3.select('#buttonZone');
+	var button = buttonZone.append('g')
+				.attr('id', 'shapeButton');
+  button.append('rect')
+		.attr('id', 'shapeButtonRect')
+		.style({fill: buttonColor})
+		.attr('width', buttonWidth)
+		.attr('height', buttonHeight)
+		.attr({x: shapeButtonX, y: shapeButtonY});
+	button.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
+		.attr({x: shapeButtonX+10, y: shapeButtonY+15})
+		.text('Shape');
+}
+
+var setupPositionButton = function() {
+	var buttonZone = d3.select('#buttonZone');
+	var button = buttonZone.append('g')
+				.attr('id', 'positionButton');
+  button.append('rect')
+		.attr('id', 'positionButtonRect')
+		.style({fill: buttonPushedColor})
+		.attr('width', buttonWidth)
+		.attr('height', buttonHeight)
+		.attr({x: positionButtonX, y: positionButtonY});
+	button.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
+		.attr({x: positionButtonX+10, y: positionButtonY+15})
+		.text('Position');
+}
+
+var setupRockManipulationButtons = function() {
+	setupColorButton();
+	setupShapeButton();
+	setupPositionButton();
+}
+
+var setupRefreshButton = function() {
+
+}
+
+var setupNextButton = function() {
+
+}
+
+var setupGameControlButtons = function() {
+	setupRefreshButton();
+	setupNextButton();
+}
+
+setupRockManipulationButtons();
+
+var clickColor = function() {
+	d3.select('#shapeButtonRect').style({fill: buttonColor});
+	d3.select('#positionButtonRect').style({fill: buttonColor});
+	var button = d3.select('#colorButtonRect');
+	button.style({fill: buttonPushedColor});
+	currentControlMode = 'color';
+	console.log(currentControlMode);
+}
+
+var clickShape = function() {
+	d3.select('#colorButtonRect').style({fill: buttonColor});
+	d3.select('#positionButtonRect').style({fill: buttonColor});
+	var button = d3.select('#shapeButtonRect');
+	button.style({fill: buttonPushedColor});
+	currentControlMode = 'shape';
+	console.log(currentControlMode);
+}
+
+var clickPosition = function() {
+	d3.select('#colorButtonRect').style({fill: buttonColor});
+	d3.select('#shapeButtonRect').style({fill: buttonColor});
+	var button = d3.select('#positionButtonRect');
+	button.style({fill: buttonPushedColor});
+	currentControlMode = 'position';
+	console.log(currentControlMode);
+}
+
+var setupColorButtonListener = function() {
+	var button = d3.select('#colorButton');
+	button.on('click', clickColor);
+}
+
+var setupShapeButtonListener = function() {
+	var button = d3.select('#shapeButton');
+	button.on('click', clickShape);
+}
+
+var setupPositionButtonListener = function() {
+	var button = d3.select('#positionButton');
+	button.on('click', clickPosition);
+}
+
+var setupRockManipulationButtonListeners = function() {
+	setupColorButtonListener();
+	setupShapeButtonListener();
+	setupPositionButtonListener();
+}
+
+setupRockManipulationButtonListeners();
+
+function dragmove(d) {
+	if (currentControlMode==='position') {
+	  d3.select(this)
+	      .attr("x", d.x = d3.event.x)
+	      .attr("y", d.y = d3.event.y);
+	}
+}
+
+function dragend(d) {
+	if (currentControlMode==='position') {
+		var rockSVG = d3.select(this);
+		var rock = collection.getRockBySVG(rockSVG[0]);
+		rock.x = d.x, rock.y = d.y;
+		if (rectOverlap(rock, trashCan)) {
+			collection.removeRock(rock);
+			rockSVG.remove();
+		} else {
+			displayUserFeedback();
+		}
+	}
+}
+
+var setupD3Drag = function() {
+	var rockDrag = d3.behavior.drag()
+	    .origin(function(d) { return d; })
+	    .on('drag', dragmove)
+	    .on('dragend', dragend);
+	return rockDrag;
+}
+
+var setupRocks = function() {
+	var rocks = d3.select('#board').selectAll('.rock')
+    .data(collection.getCollectionData())
+  .enter().append("rect")
+  	.attr('class', 'rock')
+  	.attr('id', function(d) {return d.id;})
+    .attr("width", function(d) {return d.w;})
+    .attr("height", function(d) {return d.h;})
+    .attr('x', function(d) {return d.x;})
+    .attr('y', function(d) {return d.y;})
+    .style('fill', function(d) {return rockColors[d.color]})
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5})
+    .call(rockDrag);
+
+  syncSVGsToCollection(rocks, collection);
+
+  return rocks;
+}
+
+var syncSVGsToCollection = function(sel, collection) {
+	var rocks = collection.getRocks();
+	var svgs = sel[0]
+	svgs = svgs.filter(function(svg) {return svg});
+	for (var i=rocks.length-svgs.length; i<rocks.length; i++) {
+		rocks[i].setSVG(svgs[i-(rocks.length-svgs.length)]);
+	}
+}
+
+var getRockByID = function(el) {
+	var searchID = el.getAttribute('id');
+	var r;
+	var rocks = collection.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		r = rocks[i];
+		if (searchID === r.getID()) return r;
+	}
+	return null;
+}
+
+var setupSupportCategoryExampleRocks = function() {
+	var board = d3.select('#board');
+
+	board.append('rect')
+		.attr('class', 'exampleRock')
+		.attr('width', largeRockWidth)
+		.attr('height', largeRockHeight)
+		.attr('x', 514-350)
+		.attr('y', 174)
+		.style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+
+  board.append('rect')
+		.attr('class', 'exampleRock')
+		.attr('width', smallRockWidth)
+		.attr('height', smallRockHeight)
+		.attr('x', 508-350)
+		.attr('y', 276)
+		.style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+
+  board.append('rect')
+		.attr('class', 'exampleRock')
+		.attr('width', mediumRockWidth)
+		.attr('height', mediumRockHeight)
+		.attr('x', 600-350)
+		.attr('y', 275)
+		.style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+}
+
+setupSupportCategoryExampleRocks();
+
+var changeRockColor = function(rock) {
+	if (currentControlMode==='color') {
+		var svg = rock.getSVG();
+		sel_rock = d3.select(svg);
+		rock.color = (rock.color+1)%3;
+		sel_rock.style('fill', rockColors[rock.color]);
+	}
+}
+
+var changeRockShape = function(rock) {
+	if (currentControlMode==='shape') {
+		rock.rotateSize();
+		var svg = rock.getSVG();
+		svg.setAttribute('width', rock.width);
+		svg.setAttribute('height', rock.height);
+	}
+}
+
+var clickRock = function() {
+	if (currentControlMode==='shape' || currentControlMode==='color') {
+		var rock = getRockByID(this);
+		changeRockColor(rock);
+		changeRockShape(rock);
+	}
+}
+
+var setupRockClickListeners = function() {
+	var rocks = collection.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		var rockSel = d3.select('#' + rocks[i].getID());
+		rockSel.on('click', clickRock);
+	}
+}
+
+
+var displayUserFeedback = function() {
+	if (windowSatisfiesSupportCategory()) {
+		showCorrect();
+	} else {
+		showIncorrect();
+	}
+}
+
+var showCorrect = function() {
+	d3.select('#userZone')
+	  .attr('stroke', correctColor);
+}
+
+var showIncorrect = function() {
+	d3.select('#userZone')
+	  .attr('stroke', incorrectColor);
+}
+
+rockDrag = setupD3Drag();
+setupRocks();
+setupRockClickListeners();
+
+var setupSmallReserveRock = function() {
+	var board = d3.select('#board');
+
+	board.append("rect")
+  	.attr('class', 'reserveRock')
+  	.attr('id', 'smallReserveRock')
+    .attr("width", smallRockWidth)
+    .attr("height", smallRockHeight)
+    .attr('x', boardWidth*8/10)
+    .attr('y', boardHeight*1/5)
+    .style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+}
+
+var setupMediumReserveRock = function() {
+	var board = d3.select('#board');
+
+	board.append("rect")
+  	.attr('class', 'reserveRock')
+  	.attr('id', 'mediumReserveRock')
+    .attr("width", mediumRockWidth)
+    .attr("height", mediumRockHeight)
+    .attr('x', boardWidth*8/10)
+    .attr('y', boardHeight*3/10)
+    .style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+}
+
+var setupLargeReserveRock = function() {
+	var board = d3.select('#board');
+
+	board.append("rect")
+  	.attr('class', 'reserveRock')
+  	.attr('id', 'largeReserveRock')
+    .attr("width", largeRockWidth)
+    .attr("height", largeRockHeight)
+    .attr('x', boardWidth*8/10)
+    .attr('y', boardHeight*9/20)
+    .style('fill', rockColors[0])
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5});
+}
+
+var addSmallRock = function() {
+	collection.extendCollection([{type: 'small', x: boardWidth*8/10, y: boardHeight*1/5}]);
+	var rocks = d3.select('#board').selectAll('.rock')
+    .data(collection.getCollectionData())
+  .enter().append("rect")
+  	.attr('class', 'rock')
+  	.attr('id', function(d) {return d.id;})
+    .attr("width", function(d) {return d.w;})
+    .attr("height", function(d) {return d.h;})
+    .attr('x', function(d) {return d.x;})
+    .attr('y', function(d) {return d.y;})
+    .style('fill', function(d) {return rockColors[d.color]})
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5})
+    .call(rockDrag);
+
+  setupRockClickListeners();
+  syncSVGsToCollection(rocks);
+}
+
+var addMediumRock = function() {
+	collection.extendCollection([{type: 'medium', x: boardWidth*8/10, y: boardHeight*3/10}]);
+	var rocks = d3.select('#board').selectAll('.rock')
+    .data(collection.getCollectionData())
+  .enter().append("rect")
+  	.attr('class', 'rock')
+  	.attr('id', function(d) {return d.id;})
+    .attr("width", function(d) {return d.w;})
+    .attr("height", function(d) {return d.h;})
+    .attr('x', function(d) {return d.x;})
+    .attr('y', function(d) {return d.y;})
+    .style('fill', function(d) {return rockColors[d.color]})
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5})
+    .call(rockDrag);
+
+  setupRockClickListeners();
+  syncSVGsToCollection(rocks);
+}
+
+var addLargeRock = function() {
+	collection.extendCollection([{type: 'large', x: boardWidth*8/10, y: boardHeight*9/20}]);
+	var rocks = d3.select('#board').selectAll('.rock')
+    .data(collection.getCollectionData())
+  .enter().append("rect")
+  	.attr('class', 'rock')
+  	.attr('id', function(d) {return d.id;})
+    .attr("width", function(d) {return d.w;})
+    .attr("height", function(d) {return d.h;})
+    .attr('x', function(d) {return d.x;})
+    .attr('y', function(d) {return d.y;})
+    .style('fill', function(d) {return rockColors[d.color]})
+    .attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5})
+    .call(rockDrag);
+
+  setupRockClickListeners();
+  syncSVGsToCollection(rocks);
+}
+
+var setupSmallReserveRockClickListener = function() {
+	var reserveRock = d3.select('#smallReserveRock');
+	reserveRock.on('click', addSmallRock);
+}
+
+var setupMediumReserveRockClickListener = function() {
+	var reserveRock = d3.select('#mediumReserveRock');
+	reserveRock.on('click', addMediumRock);
+}
+
+var setupLargeReserveRockClickListener = function() {
+	var reserveRock = d3.select('#largeReserveRock');
+	reserveRock.on('click', addLargeRock);
+}
+
+var setupReserveRocks = function() {
+	setupSmallReserveRock();
+	setupMediumReserveRock();
+	setupLargeReserveRock();
+}
+
+var setupReserveRockClickListeners = function() {
+	setupSmallReserveRockClickListener();
+	setupMediumReserveRockClickListener();
+	setupLargeReserveRockClickListener();
+}
+
+setupReserveRocks();
+setupReserveRockClickListeners();
+
+var trashCan = {x: boardWidth*8/10
+	             ,y: boardHeight*7/10
+	             ,width: largeRockWidth*11/10
+	             ,height: largeRockWidth*11/10};
+
+var setupTrashCan = function() {
+	var board = d3.select('#board');
+
+	var can = board.append('g')
+		.attr('id', 'trashCan');
+
+	can.append('rect')
+		.attr('id', 'trashCanRect')
+		.attr('width', largeRockWidth*11/10)
+		.attr('height', largeRockWidth*11/10)
+		.attr('x', boardWidth*8/10)
+		.attr('y', boardHeight*7/10)
+		.style('fill', 'rgb(200, 0, 25)')
+		.attr('opacity', 0.3);
+
+	can.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 20})
+		.attr({x: (boardWidth*8/10)+10, y: (boardHeight*7/10)+20})
+		.text('Trash');
+}
+
+setupTrashCan();
+
+
+</script>
