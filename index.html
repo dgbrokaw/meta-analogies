@@ -5,7 +5,7 @@
 <script src='settings.js'></script>
 <script src='rock.js'></script>
 <script src='support-category.js'></script>
-<script src='setupData.json'></script>
+<script src='data.js'></script>
 
 <body>
 </body>
@@ -15,7 +15,19 @@
 var collection = new RockCollection();
 collection.extendCollection(rockSetupData);
 var exampleCollection = new RockCollection();
-exampleCollection.extendCollection(exampleRockSetupData);
+exampleCollection.extendCollection(exampleRockSetupData.data[currentExample]);
+
+var correct = false;
+
+function setCorrect(zoneID) {
+	if (zoneID==="#userZone")
+		correct = true;
+}
+
+function setIncorrect(zoneID) {
+	if (zoneID==="#userZone")
+		correct = false;
+}
 
 var setupBoard = function() {
 	var svg = d3.select('body').append('svg')
@@ -121,7 +133,19 @@ var setupRefreshButton = function() {
 }
 
 var setupNextButton = function() {
-
+	var board = d3.select('#board');
+	var button = board.append('g')
+				.attr('id', 'nextButton');
+  button.append('rect')
+		.attr('id', 'nextButtonRect')
+		.style({fill: buttonPushedColor})
+		.attr('width', buttonWidth)
+		.attr('height', buttonHeight)
+		.attr({x: nextButtonX, y: nextButtonY});
+	button.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
+		.attr({x: nextButtonX+10, y: nextButtonY+15})
+		.text('Next');
 }
 
 var setupGameControlButtons = function() {
@@ -130,6 +154,7 @@ var setupGameControlButtons = function() {
 }
 
 setupRockManipulationButtons();
+setupNextButton();
 
 var clickColor = function() {
 	d3.select('#shapeButtonRect').style({fill: buttonColor});
@@ -180,6 +205,28 @@ var setupRockManipulationButtonListeners = function() {
 }
 
 setupRockManipulationButtonListeners();
+
+var clickNext = function() {
+	if (correct && currentExample<exampleRockSetupData.data.length-1) {
+		collection.clearCollection();
+		exampleCollection.clearCollection();
+		currentExample++;
+		collection.extendCollection(rockSetupData);
+		setupRocks();
+		setupRockClickListeners();
+		exampleCollection.extendCollection(exampleRockSetupData.data[currentExample])
+		setupSupportCategoryExampleRocks();
+		setupExampleRockClickListeners();
+		setIncorrect();
+	}
+}
+
+var setupNextButtonListener = function() {
+	var button = d3.select('#nextButton');
+	button.on('click', clickNext);
+}
+
+setupNextButtonListener();
 
 function dragmove(d) {
 	if (currentControlMode==='position') {
@@ -341,11 +388,25 @@ var setupExampleRockClickListeners = function() {
 	}
 }
 
+var activateNextButton = function(zoneID) {
+	if (zoneID==='#userZone')
+		d3.select('#nextButtonRect').style({fill: buttonColor});
+}
+
+var deactivateNextButton = function(zoneID) {
+	if (zoneID==='#userZone')
+		d3.select('#nextButtonRect').style("fill", buttonPushedColor);
+}
+
 var displayUserFeedback = function(collection, zoneID) {
 	if (windowSatisfiesSupportCategory(collection)) {
 		showCorrect(zoneID);
+		setCorrect(zoneID);
+		activateNextButton(zoneID);
 	} else {
 		showIncorrect(zoneID);
+		setIncorrect(zoneID);
+		deactivateNextButton(zoneID);
 	}
 }
 
@@ -424,7 +485,7 @@ var addSmallRock = function() {
     .call(rockDrag);
 
   setupRockClickListeners();
-  syncSVGsToCollection(rocks);
+  syncSVGsToCollection(rocks, collection);
 }
 
 var addMediumRock = function() {
@@ -443,7 +504,7 @@ var addMediumRock = function() {
     .call(rockDrag);
 
   setupRockClickListeners();
-  syncSVGsToCollection(rocks);
+  syncSVGsToCollection(rocks, collection);
 }
 
 var addLargeRock = function() {
@@ -462,7 +523,7 @@ var addLargeRock = function() {
     .call(rockDrag);
 
   setupRockClickListeners();
-  syncSVGsToCollection(rocks);
+  syncSVGsToCollection(rocks, collection);
 }
 
 var setupSmallReserveRockClickListener = function() {

@@ -24,6 +24,12 @@ var boardHeight = 500
 
    ,currentControlMode = 'position'
 
+   ,refreshButtonX = boardWidth*1/3
+   ,refreshButtonY = boardHeight-buttonHeight
+
+   ,nextButtonX = boardWidth*1/2
+   ,nextButtonY = boardHeight-buttonHeight
+
    ,rockZoneHeight = 350
    ,rockZoneWidth = rockZoneHeight
 

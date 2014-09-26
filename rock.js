@@ -111,3 +111,10 @@ RockCollection.prototype.getRockBySVG = function(svg) {
 RockCollection.prototype.removeRock = function(rock) {
 	this.rocks.splice(this.rocks.indexOf(rock), 1);
 }
+
+RockCollection.prototype.clearCollection = function() {
+	for (var i=0; i<this.rocks.length; i++) {
+		this.rocks[i].getSVG().remove();
+	}
+	this.rocks = [];
+}
