@@ -1,6 +1,6 @@
 var rocks;
 
-var windowSatisfiesSupportCategory = function() {
+var windowSatisfiesSupportCategory = function(collection) {
 	if (collection.numberOfRocks() !== 3) return false;
 	rocks = collection.getRocks();
 	for (var i=0; i<rocks.length; i++) {
