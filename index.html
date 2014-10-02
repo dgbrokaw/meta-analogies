@@ -106,26 +106,26 @@ var setupShapeButton = function() {
 		.text('Shape');
 }
 
-var setupPositionButton = function() {
-	var buttonZone = d3.select('#buttonZone');
-	var button = buttonZone.append('g')
-				.attr('id', 'positionButton');
-  button.append('rect')
-		.attr('id', 'positionButtonRect')
-		.style({fill: buttonPushedColor})
-		.attr('width', buttonWidth)
-		.attr('height', buttonHeight)
-		.attr({x: positionButtonX, y: positionButtonY});
-	button.append('text')
-		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
-		.attr({x: positionButtonX+10, y: positionButtonY+15})
-		.text('Position');
-}
+// var setupPositionButton = function() {
+// 	var buttonZone = d3.select('#buttonZone');
+// 	var button = buttonZone.append('g')
+// 				.attr('id', 'positionButton');
+//   button.append('rect')
+// 		.attr('id', 'positionButtonRect')
+// 		.style({fill: buttonPushedColor})
+// 		.attr('width', buttonWidth)
+// 		.attr('height', buttonHeight)
+// 		.attr({x: positionButtonX, y: positionButtonY});
+// 	button.append('text')
+// 		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
+// 		.attr({x: positionButtonX+10, y: positionButtonY+15})
+// 		.text('Position');
+// }
 
 var setupRockManipulationButtons = function() {
 	setupColorButton();
 	setupShapeButton();
-	setupPositionButton();
+	//setupPositionButton();
 }
 
 var setupRefreshButton = function() {
@@ -162,6 +162,7 @@ var clickColor = function() {
 	var button = d3.select('#colorButtonRect');
 	button.style({fill: buttonPushedColor});
 	currentControlMode = 'color';
+	prevMode = 'color';
 	console.log(currentControlMode);
 }
 
@@ -171,17 +172,18 @@ var clickShape = function() {
 	var button = d3.select('#shapeButtonRect');
 	button.style({fill: buttonPushedColor});
 	currentControlMode = 'shape';
+	prevMode = 'shape';
 	console.log(currentControlMode);
 }
 
-var clickPosition = function() {
-	d3.select('#colorButtonRect').style({fill: buttonColor});
-	d3.select('#shapeButtonRect').style({fill: buttonColor});
-	var button = d3.select('#positionButtonRect');
-	button.style({fill: buttonPushedColor});
-	currentControlMode = 'position';
-	console.log(currentControlMode);
-}
+// var clickPosition = function() {
+// 	d3.select('#colorButtonRect').style({fill: buttonColor});
+// 	d3.select('#shapeButtonRect').style({fill: buttonColor});
+// 	var button = d3.select('#positionButtonRect');
+// 	button.style({fill: buttonPushedColor});
+// 	currentControlMode = 'position';
+// 	console.log(currentControlMode);
+// }
 
 var setupColorButtonListener = function() {
 	var button = d3.select('#colorButton');
@@ -193,15 +195,15 @@ var setupShapeButtonListener = function() {
 	button.on('click', clickShape);
 }
 
-var setupPositionButtonListener = function() {
-	var button = d3.select('#positionButton');
-	button.on('click', clickPosition);
-}
+// var setupPositionButtonListener = function() {
+// 	var button = d3.select('#positionButton');
+// 	button.on('click', clickPosition);
+// }
 
 var setupRockManipulationButtonListeners = function() {
 	setupColorButtonListener();
 	setupShapeButtonListener();
-	setupPositionButtonListener();
+	//setupPositionButtonListener();
 }
 
 setupRockManipulationButtonListeners();
@@ -228,35 +230,56 @@ var setupNextButtonListener = function() {
 
 setupNextButtonListener();
 
+var prevMode = null
+var dragThreshold = 1;
+var initialX = null, initialY = null;
 function dragmove(d) {
-	if (currentControlMode==='position') {
+	//if (currentControlMode==='position') {
+		currentControlMode = prevMode;
+		if (!initialX) {
+			initialX = d3.event.x, initialY = d3.event.y;
+			console.log(initialX, initialY);
+		}
 	  d3.select(this)
 	      .attr("x", d.x = d3.event.x)
 	      .attr("y", d.y = d3.event.y);
-	}
+	//}
 }
 
 function dragend(d) {
-	if (currentControlMode==='position') {
+	//if (currentControlMode==='position') {
 		var rockSVG = d3.select(this);
 		var rock = collection.getRockBySVG(rockSVG[0]);
 		rock.x = d.x, rock.y = d.y;
+		console.log(rock.x, rock.y);
 		if (rectOverlap(rock, trashCan)) {
 			collection.removeRock(rock);
 			rockSVG.remove();
 		} else {
 			displayUserFeedback(collection, '#userZone');
 		}
-	}
+		if (initialX && (Math.abs(rock.x-initialX)>dragThreshold || Math.abs(rock.y-initialY)>dragThreshold)) {
+			prevMode = currentControlMode;
+			currentControlMode = 'position';
+			initialX = null, initialY = null;
+		} else {
+			currentControlMode = prevMode;
+			initialX = null, initialY = null;
+		}
+	//}
 }
 
 function exampleDragend(d) {
-	if (currentControlMode==='position') {
+	//if (currentControlMode==='position') {
 		var rockSVG = d3.select(this);
 		var rock = exampleCollection.getRockBySVG(rockSVG[0]);
 		rock.x = d.x, rock.y = d.y;
+		// if (rectOverlap(rock, trashCan)) {
+		// 	collection.removeRock(rock);
+		// 	rockSVG.remove();
+		// }
 		displayUserFeedback(exampleCollection, '#controlZone');
-	}
+	//}
 }
 
 var setupD3Drag = function(dragend) {
@@ -356,6 +379,8 @@ var changeRockShape = function(rock, collection, zoneID) {
 }
 
 var clickRock = function() {
+	// currentControlMode = prevMode;
+	// prevMode = null;
 	if (currentControlMode==='shape' || currentControlMode==='color') {
 		var rock = getRockByID(this);
 		changeRockColor(rock, collection, "#userZone");
@@ -365,7 +390,6 @@ var clickRock = function() {
 
 var setupRockClickListeners = function() {
 	var rocks = collection.getRocks();
-	var thiz = this;
 	for (var i=0; i<rocks.length; i++) {
 		var rockSel = d3.select('#' + rocks[i].getID());
 		rockSel.on('click', clickRock);

@@ -1,7 +1,7 @@
 var rocks;
 
 var windowSatisfiesSupportCategory = function(collection) {
-	if (collection.numberOfRocks() !== 3) return false;
+	//if (collection.numberOfRocks() !== 3) return false;
 	rocks = collection.getRocks();
 	for (var i=0; i<rocks.length; i++) {
 		if (rockSatisfiesSupportCategory(i)) return true;
@@ -9,12 +9,25 @@ var windowSatisfiesSupportCategory = function(collection) {
 	return false;
 }
 
+// var rockSatisfiesSupportCategory = function(rockIDX) {
+// 	var A = rocks[rockIDX]
+// 	   ,B = rocks[(rockIDX+1)%3]
+// 	   ,C = rocks[(rockIDX+2)%3];
+
+// 	return runChecks(A, B, C) || runChecks(A, C, B);
+// }
+
 var rockSatisfiesSupportCategory = function(rockIDX) {
 	var A = rocks[rockIDX]
-	   ,B = rocks[(rockIDX+1)%3]
-	   ,C = rocks[(rockIDX+2)%3];
-
-	return runChecks(A, B, C) || runChecks(A, C, B);
+	for (var i=0; i<rocks.length; i++) {
+		for (var j=0; j<rocks.length; j++) {
+			if (i!==j && i!==rockIDX && j!==rockIDX) {
+				var B = rocks[i], C = rocks[j];
+				if (runChecks(A, B, C)) return true;
+			}
+		}
+	}
+	return false;
 }
 
 var runChecks = function(A, B, C) {
