@@ -80,7 +80,7 @@ var setupColorButton = function() {
 				.attr('id', 'colorButton');
   button.append('rect')
 		.attr('id', 'colorButtonRect')
-		.style({fill: buttonColor})
+		.style({fill: buttonPushedColor})
 		.attr('width', buttonWidth)
 		.attr('height', buttonHeight)
 		.attr({x: colorButtonX, y: colorButtonY});
@@ -230,7 +230,7 @@ var setupNextButtonListener = function() {
 
 setupNextButtonListener();
 
-var prevMode = null
+var prevMode = 'color';
 var dragThreshold = 1;
 var initialX = null, initialY = null;
 function dragmove(d) {

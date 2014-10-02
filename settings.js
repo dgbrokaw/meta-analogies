@@ -22,7 +22,7 @@ var boardHeight = 500
    ,positionButtonX = shapeButtonX + buttonWidth + buttonZoneWidth*1/16
    ,positionButtonY = colorButtonY
 
-   ,currentControlMode = 'position'
+   ,currentControlMode = 'color'
 
    ,refreshButtonX = boardWidth*1/3
    ,refreshButtonY = boardHeight-buttonHeight
