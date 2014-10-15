@@ -35,6 +35,7 @@ Rock.prototype.updateSize = function() {
 	}
 }
 
+// should not need this function after resize handle is implemented
 Rock.prototype.rotateSize = function() {
 	if (this.type==='small') {
 		this.type = 'medium';
