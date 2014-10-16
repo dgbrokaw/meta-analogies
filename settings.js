@@ -30,6 +30,8 @@ var boardHeight = 500
    ,nextButtonX = boardWidth*1/2
    ,nextButtonY = boardHeight-buttonHeight
 
+   ,rockZoneColor = 'linen'
+
    ,rockZoneHeight = 350
    ,rockZoneWidth = rockZoneHeight
 

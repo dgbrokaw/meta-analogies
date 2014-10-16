@@ -54,7 +54,7 @@ var setupButtonZone = function() {
 var setupControlRockZone = function() {
 	d3.select('#board').append('rect')
 		 .attr('id', 'controlZone')
-	   .style('fill', boardColor)
+	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: correctColor})
 	   .attr({x: controlRockZoneX, y: controlRockZoneY});
 }
@@ -62,7 +62,7 @@ var setupControlRockZone = function() {
 var setupUserRockZone = function() {
 	d3.select('#board').append('rect')
 		 .attr('id', 'userZone')
-	   .style('fill', boardColor)
+	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
 	   .attr({x: userRockZoneX, y: userRockZoneY});
 }
