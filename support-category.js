@@ -100,19 +100,23 @@ function ABottomTouchesBAndCTops(A, B, C) {
 var BIsCenterLeftOfA = function(A, B) {
 	var ACenter = (A.x + A.x + A.width)/2;
 	var ALeft = A.x;
-	var BCenter = (B.x + B.x + B.width)/2;
+	// var BCenter = (B.x + B.x + B.width)/2;
+	var BLeft = B.x;
 	var BRight = B.x + B.width;
 
-	return BCenter < ACenter && BRight > ALeft;
+	// return BCenter < ACenter && BRight > ALeft;
+	return BLeft < ACenter && BRight > ALeft;
 }
 
 var CIsCenterRightOfA = function(A, C) {
 	var ACenter = (A.x + A.x + A.width)/2;
 	var ARight = A.x + A.width;
-	var CCenter = (C.x + C.x + C.width)/2;
+	// var CCenter = (C.x + C.x + C.width)/2;
 	var CLeft = C.x;
+	var CRight = C.x + C.width;
 
-	return CCenter > ACenter && CLeft < ARight;
+	// return CCenter > ACenter && CLeft < ARight;
+	return CLeft < ARight;
 }
 
 var rectOverlap = function(A, B) {

@@ -3,8 +3,8 @@ var boardHeight = 500
    ,boardColor = 'white'
 
    ,buttonZoneHeight = boardHeight/10
-   ,buttonZoneWidth = boardWidth*9/10
-   ,buttonZoneX = (boardWidth-buttonZoneWidth)/2
+   ,buttonZoneWidth = boardWidth*6/10
+   ,buttonZoneX = boardWidth*3/40
    ,buttonZoneY = 25
 
    ,buttonHeight = buttonZoneHeight*3/4
