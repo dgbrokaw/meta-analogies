@@ -69,13 +69,13 @@ var rockSatisfiesSupportCategory = function(rockIDX) {
 }
 
 var runChecks = function(A, B, C) {
-	console.log('A:', A);
+	// console.log('A:', A);
 	var test1 = ABottomTouchesBAndCTops(A, B, C)
 	   ,test2 = BIsCenterLeftOfA(A, B)
 	   ,test3 = CIsCenterRightOfA(A, C);
-	console.log('test1', test1);
-	console.log('test2', test2);
-	console.log('test3', test3);
+	// console.log('test1', test1);
+	// console.log('test2', test2);
+	// console.log('test3', test3);
 	return test1 && test2 && test3;
 }
 

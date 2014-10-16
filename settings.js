@@ -46,13 +46,15 @@ var boardHeight = 500
                  ,'rgb(175,150,150)'
                  ,'rgb(225,200,210)']
 
-   ,smallRockHeight = 25
+   ,rockHeight = 50
+
+   ,smallRockHeight = rockHeight
    ,smallRockWidth = smallRockHeight
 
-   ,mediumRockHeight = 50
+   ,mediumRockHeight = rockHeight
    ,mediumRockWidth = 75
 
-   ,largeRockHeight = 100
+   ,largeRockHeight = rockHeight
    ,largeRockWidth = 125
 
    ,rockSetupData = [{type: 'small', x: 478, y: 188}
