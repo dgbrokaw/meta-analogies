@@ -72,47 +72,6 @@ setupButtonZone();
 setupControlRockZone();
 setupUserRockZone();
 
-var setupColorButton = function() {
-	var buttonZone = d3.select('#buttonZone');
-	var button = buttonZone.append('g')
-				.attr('id', 'colorButton');
-  button.append('rect')
-		.attr('id', 'colorButtonRect')
-		.style({fill: buttonPushedColor})
-		.attr('width', buttonWidth)
-		.attr('height', buttonHeight)
-		.attr({x: colorButtonX, y: colorButtonY});
-	button.append('text')
-		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
-		.attr({x: colorButtonX+10, y: colorButtonY+15})
-		.text('Color');
-}
-
-var setupShapeButton = function() {
-	var buttonZone = d3.select('#buttonZone');
-	var button = buttonZone.append('g')
-				.attr('id', 'shapeButton');
-  button.append('rect')
-		.attr('id', 'shapeButtonRect')
-		.style({fill: buttonColor})
-		.attr('width', buttonWidth)
-		.attr('height', buttonHeight)
-		.attr({x: shapeButtonX, y: shapeButtonY});
-	button.append('text')
-		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
-		.attr({x: shapeButtonX+10, y: shapeButtonY+15})
-		.text('Shape');
-}
-
-var setupRockManipulationButtons = function() {
-	setupColorButton();
-	setupShapeButton();
-}
-
-var setupRefreshButton = function() {
-
-}
-
 var setupNextButton = function() {
 	var board = d3.select('#board');
 	var button = board.append('g')
@@ -126,7 +85,7 @@ var setupNextButton = function() {
 	button.append('text')
 		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
 		.attr({x: nextButtonX+10, y: nextButtonY+15})
-		.text('Next');
+		//.text('Next');
 }
 
 var setupGameControlButtons = function() {
@@ -134,45 +93,7 @@ var setupGameControlButtons = function() {
 	setupNextButton();
 }
 
-setupRockManipulationButtons();
 setupNextButton();
-
-var clickColor = function() {
-	d3.select('#shapeButtonRect').style({fill: buttonColor});
-	d3.select('#positionButtonRect').style({fill: buttonColor});
-	var button = d3.select('#colorButtonRect');
-	button.style({fill: buttonPushedColor});
-	currentControlMode = 'color';
-	prevMode = 'color';
-	console.log(currentControlMode);
-}
-
-var clickShape = function() {
-	d3.select('#colorButtonRect').style({fill: buttonColor});
-	d3.select('#positionButtonRect').style({fill: buttonColor});
-	var button = d3.select('#shapeButtonRect');
-	button.style({fill: buttonPushedColor});
-	currentControlMode = 'shape';
-	prevMode = 'shape';
-	console.log(currentControlMode);
-}
-
-var setupColorButtonListener = function() {
-	var button = d3.select('#colorButton');
-	button.on('click', clickColor);
-}
-
-var setupShapeButtonListener = function() {
-	var button = d3.select('#shapeButton');
-	button.on('click', clickShape);
-}
-
-var setupRockManipulationButtonListeners = function() {
-	setupColorButtonListener();
-	setupShapeButtonListener();
-}
-
-setupRockManipulationButtonListeners();
 
 var clickNext = function() {
 	if (correct && currentExample<exampleRockSetupData.data.length-1) {
@@ -182,7 +103,7 @@ var clickNext = function() {
 		collection.extendCollection(exampleRockSetupData.data[currentExample]);
 		collection.extendCollection(benchRockData);
 		setupRocks();
-		setupRockClickListeners();
+		setupRockDblClickListeners();
 		displayUserFeedback();
 		setIncorrect();
 	}
@@ -195,12 +116,10 @@ var setupNextButtonListener = function() {
 
 setupNextButtonListener();
 
-var prevMode = 'color';
 var dragThreshold = 1;
 var initialX = null, initialY = null;
 
 function dragmove(d) {
-	currentControlMode = prevMode;
 	if (!initialX) {
 		initialX = d3.event.x, initialY = d3.event.y;
 		// console.log(initialX, initialY);
@@ -216,14 +135,7 @@ function dragend(d) {
 	rock.x = d.x, rock.y = d.y;
 	//console.log(rock.x, rock.y);
 	displayUserFeedback();
-	if (initialX && (Math.abs(rock.x-initialX)>dragThreshold || Math.abs(rock.y-initialY)>dragThreshold)) {
-		prevMode = currentControlMode;
-		currentControlMode = 'position';
-		initialX = null, initialY = null;
-	} else {
-		currentControlMode = prevMode;
-		initialX = null, initialY = null;
-	}
+	initialX = null, initialY = null;
 }
 
 var setupD3Drag = function() {
@@ -274,38 +186,31 @@ var getRockByID = function(el) {
 }
 
 var changeRockColor = function(rock) {
-	if (currentControlMode==='color') {
-		var svg = rock.getSVG();
-		sel_rock = d3.select(svg);
-		rock.color = (rock.color+1)%3;
-		sel_rock.style('fill', rockColors[rock.color]);
-		displayUserFeedback();
-	}
+	var svg = rock.getSVG();
+	sel_rock = d3.select(svg);
+	rock.color = (rock.color+1)%3;
+	sel_rock.style('fill', rockColors[rock.color]);
+	displayUserFeedback();
 }
 
 var changeRockShape = function(rock) {
-	if (currentControlMode==='shape') {
-		rock.rotateSize();
-		var svg = rock.getSVG();
-		svg.setAttribute('width', rock.width);
-		svg.setAttribute('height', rock.height);
-		displayUserFeedback();
-	}
+	rock.rotateSize();
+	var svg = rock.getSVG();
+	svg.setAttribute('width', rock.width);
+	svg.setAttribute('height', rock.height);
+	displayUserFeedback();
 }
 
-var clickRock = function() {
-	if (currentControlMode==='shape' || currentControlMode==='color') {
-		var rock = getRockByID(this);
-		changeRockColor(rock);
-		changeRockShape(rock);
-	}
+var dblClickRock = function() {
+	var rock = getRockByID(this);
+	changeRockColor(rock);
 }
 
-var setupRockClickListeners = function() {
+var setupRockDblClickListeners = function() {
 	var rocks = collection.getRocks();
 	for (var i=0; i<rocks.length; i++) {
 		var rockSel = d3.select('#' + rocks[i].getID());
-		rockSel.on('click', clickRock);
+		rockSel.on('dblclick', dblClickRock);
 	}
 }
 
@@ -354,6 +259,6 @@ var showIncorrect = function(zoneID) {
 
 var rockDrag = setupD3Drag();
 setupRocks();
-setupRockClickListeners();
+setupRockDblClickListeners();
 
 </script>
