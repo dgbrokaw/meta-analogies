@@ -52,6 +52,10 @@ Rock.prototype.rotateSize = function() {
 	}
 }
 
+Rock.prototype.rotateColor = function() {
+	this.color = (this.color+1)%3;
+}
+
 Rock.prototype.setSVG = function(svg) {
 	this.svgg = svg;
 }

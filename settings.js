@@ -41,7 +41,7 @@ var boardHeight = 500
    ,userRockZoneX = controlRockZoneX + rockZoneWidth + controlRockZoneX
    ,userRockZoneY = controlRockZoneY
 
-	 ,correctColor = 'rgb(0,255,0)'
+	,correctColor = 'rgb(0,255,0)'
    ,incorrectColor = 'rgb(255,0,0)'
 
    ,rockColors = ['rgb(125,100,100)'
@@ -59,12 +59,7 @@ var boardHeight = 500
    ,largeRockHeight = rockHeight
    ,largeRockWidth = 125
 
-   ,rockSetupData = [{type: 'small', x: 478, y: 188}
-    	              ,{type: 'medium', x: 600, y: 227}
-    	              ,{type: 'large', x: 465, y: 303}]
-
-   ,exampleRockSetupData = [{type: 'small',x: 508-350,y: 276}
-                           ,{type: 'medium',x: 600-350,y: 275}
-                           ,{type: 'large',x: 514-350,y: 174}]
+   ,resizeCircleRadius = 10
 
    ,rockDrag
+   ,resizeToolDrag
