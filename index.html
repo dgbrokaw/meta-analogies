@@ -137,24 +137,37 @@ setupNextButtonListener();
 var dragThreshold = 1;
 var initialX = null, initialY = null;
 
-function dragmove(d) {
+function dragstart(d) {
+	var rock_sel = d3.select(this);
+	var rock = collection.getRockBySVG(rock_sel[0]);
+	rock.x = d.x, rock.y = d.y;
+
 	if (!initialX) {
 		initialX = d3.event.x, initialY = d3.event.y;
 		// console.log(initialX, initialY);
 	}
-  d3.select(this)
-      .attr("x", d.x = d3.event.x)
-      .attr("y", d.y = d3.event.y);
+  selectedRock = {rock: rock, rock_sel: rock_sel};
+  appendResizeTool();
+  resizeBox.handle.remove();
+}
+
+function dragmove(d) {
+	d3.select(this)
+    .attr("x", d.x = d3.event.x)
+    .attr("y", d.y = d3.event.y);
+
+  if (resizeBox.box) {
+  	resizeBox.box
+  		.attr("x", d.x)
+  		.attr("y", d.y);
+  }
 }
 
 function dragend(d) {
-	var rock_sel = d3.select(this);
-	var rock = collection.getRockBySVG(rock_sel[0]);
-	rock.x = d.x, rock.y = d.y;
+	selectedRock.rock.x = d.x, selectedRock.rock.y = d.y;
 	//console.log(rock.x, rock.y);
 	displayUserFeedback();
 	initialX = null, initialY = null;
-	selectedRock = {rock: rock, rock_sel: rock_sel};
 	clearPreviewLines()
 	appendResizeTool();
 }
@@ -162,6 +175,7 @@ function dragend(d) {
 var setupD3Drag = function() {
 	var rockDrag = d3.behavior.drag()
 	    .origin(function(d) { return d; })
+	    .on('dragstart', dragstart)
 	    .on('drag', dragmove)
 	    .on('dragend', dragend);
 	return rockDrag;
