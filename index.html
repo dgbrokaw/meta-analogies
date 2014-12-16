@@ -115,6 +115,7 @@ setupNextButton();
 
 var clickNext = function() {
 	if (correct && currentExample<exampleRockSetupData.data.length-1) {
+		removeResizeTool();
 		collection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
@@ -183,6 +184,7 @@ var setupD3Drag = function() {
 
 var board = d3.select('#board');
 var resizeInitialX;
+
 function resizeDragmove(d) {
 	if (!resizeInitialX) {
 		resizeInitialX = d3.event.x;
@@ -388,8 +390,7 @@ setupRockDblClickListeners();
 
 function appendResizeTool() {
 	if (selectedRock) {
-		d3.select('#resizeBox').remove();
-		d3.select('#resizeCircle').remove();
+		removeResizeTool();
 		resizeBox.otherSizes = getOtherSizes(selectedRock.rock.type);
 		resizeBox.box = appendResizeBox();
 		resizeBox.handle = appendResizeCircle()
@@ -421,6 +422,11 @@ function appendResizeCircle() {
 		.style({fill: 'blue'})
 		.call(resizeToolDrag);
 	return handle;
+}
+
+function removeResizeTool() {
+	d3.select('#resizeBox').remove();
+	d3.select('#resizeCircle').remove();
 }
 
 resizeToolDrag = setupResizeDrag();
