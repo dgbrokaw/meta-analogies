@@ -5,6 +5,7 @@
 <script src='settings.js'></script>
 <script src='rock.js'></script>
 <script src='support-category.js'></script>
+<script src='sandwich-category.js'></script>
 <script src='data.js'></script>
 
 <style>
@@ -160,6 +161,8 @@ function dragstart(d) {
   selectedRock = {rock: rock, rock_sel: rock_sel};
   appendResizeTool();
   resizeBox.handle.remove();
+  showNeutral('#controlZone');
+  showNeutral('#userZone');
 }
 
 function dragmove(d) {
@@ -365,7 +368,8 @@ var displayUserFeedback = function() {
 }
 
 function checkControlWindow() {
-	if (controlWindowSatisfiesSupportCategory()) {
+	//if (controlWindowSatisfiesSupportCategory()) {
+  if (controlWindowSatisfiesSandwichCategory()) {
 		showCorrect('#controlZone');
 	} else {
 		showIncorrect('#controlZone');
@@ -373,7 +377,8 @@ function checkControlWindow() {
 }
 
 function checkUserWindow() {
-	if (userWindowSatisfiesSupportCategory()) {
+	//if (userWindowSatisfiesSupportCategory()) {
+	if (userWindowSatisfiesSandwichCategory()) {
 		showCorrect('#userZone');
 		setCorrect();
 		activateNextButton();
@@ -392,6 +397,11 @@ var showCorrect = function(zoneID) {
 var showIncorrect = function(zoneID) {
 	d3.select(zoneID)
 	  .attr('stroke', incorrectColor);
+}
+
+var showNeutral = function(zoneID) {
+	d3.select(zoneID)
+		.attr('stroke', 'rgb(112,112,112)');
 }
 
 rockDrag = setupD3Drag();
