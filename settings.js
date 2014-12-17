@@ -44,22 +44,22 @@ var boardHeight = 500
 	,correctColor = 'rgb(0,255,0)'
    ,incorrectColor = 'rgb(255,0,0)'
 
-   ,rockColors = ['rgb(125,100,100)'
-                 ,'rgb(175,150,150)'
-                 ,'rgb(225,200,210)']
+   ,rockColors = ['rgb(60,25,25)'
+                 ,'rgb(150,155,150)'
+                 ,'rgb(225,225,255)']
 
-   ,rockHeight = 50
+   ,rockHeight = 30
 
    ,smallRockHeight = rockHeight
    ,smallRockWidth = smallRockHeight
 
    ,mediumRockHeight = rockHeight
-   ,mediumRockWidth = 75
+   ,mediumRockWidth = 45
 
    ,largeRockHeight = rockHeight
-   ,largeRockWidth = 125
+   ,largeRockWidth = 70
 
-   ,resizeCircleRadius = 10
+   ,resizeCircleRadius = 5
 
    ,rockDrag
    ,resizeToolDrag

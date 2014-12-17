@@ -5,7 +5,14 @@
 <script src='settings.js'></script>
 <script src='rock.js'></script>
 <script src='support-category.js'></script>
+<script src='sandwich-category.js'></script>
 <script src='data.js'></script>
+
+<style>
+.noselect {
+	-webkit-user-select:none;
+}
+</style>
 
 <body>
 </body>
@@ -49,12 +56,14 @@ var setupBoard = function() {
 	var svg = d3.select('body').append('svg')
 		.attr('id', 'board')
 		.attr('width', boardWidth)
-		.attr('height', boardHeight);
+		.attr('height', boardHeight)
+		.classed('noselect', true);
 		//.style({ display:'block', margin:'auto', padding:'0' });
 
 	svg.append('rect')
 	   .style('fill', boardColor)
-	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'});
+	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
+	   .classed('noselect', true);
 }
 
 var setupButtonZone = function() {
@@ -74,7 +83,8 @@ var setupControlRockZone = function() {
 		 .attr('id', 'controlZone')
 	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: correctColor})
-	   .attr({x: controlRockZoneX, y: controlRockZoneY});
+	   .attr({x: controlRockZoneX, y: controlRockZoneY})
+	   .classed('noselect', true);
 }
 
 var setupUserRockZone = function() {
@@ -82,7 +92,8 @@ var setupUserRockZone = function() {
 		 .attr('id', 'userZone')
 	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
-	   .attr({x: userRockZoneX, y: userRockZoneY});
+	   .attr({x: userRockZoneX, y: userRockZoneY})
+	   .classed('noselect', true);
 }
 
 setupBoard();
@@ -115,6 +126,7 @@ setupNextButton();
 
 var clickNext = function() {
 	if (correct && currentExample<exampleRockSetupData.data.length-1) {
+		removeResizeTool();
 		collection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
@@ -149,6 +161,8 @@ function dragstart(d) {
   selectedRock = {rock: rock, rock_sel: rock_sel};
   appendResizeTool();
   resizeBox.handle.remove();
+  showNeutral('#controlZone');
+  showNeutral('#userZone');
 }
 
 function dragmove(d) {
@@ -183,6 +197,7 @@ var setupD3Drag = function() {
 
 var board = d3.select('#board');
 var resizeInitialX;
+
 function resizeDragmove(d) {
 	if (!resizeInitialX) {
 		resizeInitialX = d3.event.x;
@@ -353,7 +368,8 @@ var displayUserFeedback = function() {
 }
 
 function checkControlWindow() {
-	if (controlWindowSatisfiesSupportCategory()) {
+	//if (controlWindowSatisfiesSupportCategory()) {
+  if (controlWindowSatisfiesSandwichCategory()) {
 		showCorrect('#controlZone');
 	} else {
 		showIncorrect('#controlZone');
@@ -361,7 +377,8 @@ function checkControlWindow() {
 }
 
 function checkUserWindow() {
-	if (userWindowSatisfiesSupportCategory()) {
+	//if (userWindowSatisfiesSupportCategory()) {
+	if (userWindowSatisfiesSandwichCategory()) {
 		showCorrect('#userZone');
 		setCorrect();
 		activateNextButton();
@@ -382,14 +399,18 @@ var showIncorrect = function(zoneID) {
 	  .attr('stroke', incorrectColor);
 }
 
+var showNeutral = function(zoneID) {
+	d3.select(zoneID)
+		.attr('stroke', 'rgb(112,112,112)');
+}
+
 rockDrag = setupD3Drag();
 setupRocks();
 setupRockDblClickListeners();
 
 function appendResizeTool() {
 	if (selectedRock) {
-		d3.select('#resizeBox').remove();
-		d3.select('#resizeCircle').remove();
+		removeResizeTool();
 		resizeBox.otherSizes = getOtherSizes(selectedRock.rock.type);
 		resizeBox.box = appendResizeBox();
 		resizeBox.handle = appendResizeCircle()
@@ -421,6 +442,11 @@ function appendResizeCircle() {
 		.style({fill: 'blue'})
 		.call(resizeToolDrag);
 	return handle;
+}
+
+function removeResizeTool() {
+	d3.select('#resizeBox').remove();
+	d3.select('#resizeCircle').remove();
 }
 
 resizeToolDrag = setupResizeDrag();
