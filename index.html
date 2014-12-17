@@ -7,6 +7,12 @@
 <script src='support-category.js'></script>
 <script src='data.js'></script>
 
+<style>
+.noselect {
+	-webkit-user-select:none;
+}
+</style>
+
 <body>
 </body>
 
@@ -49,12 +55,14 @@ var setupBoard = function() {
 	var svg = d3.select('body').append('svg')
 		.attr('id', 'board')
 		.attr('width', boardWidth)
-		.attr('height', boardHeight);
+		.attr('height', boardHeight)
+		.classed('noselect', true);
 		//.style({ display:'block', margin:'auto', padding:'0' });
 
 	svg.append('rect')
 	   .style('fill', boardColor)
-	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'});
+	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
+	   .classed('noselect', true);
 }
 
 var setupButtonZone = function() {
@@ -74,7 +82,8 @@ var setupControlRockZone = function() {
 		 .attr('id', 'controlZone')
 	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: correctColor})
-	   .attr({x: controlRockZoneX, y: controlRockZoneY});
+	   .attr({x: controlRockZoneX, y: controlRockZoneY})
+	   .classed('noselect', true);
 }
 
 var setupUserRockZone = function() {
@@ -82,7 +91,8 @@ var setupUserRockZone = function() {
 		 .attr('id', 'userZone')
 	   .style('fill', rockZoneColor)
 	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
-	   .attr({x: userRockZoneX, y: userRockZoneY});
+	   .attr({x: userRockZoneX, y: userRockZoneY})
+	   .classed('noselect', true);
 }
 
 setupBoard();
