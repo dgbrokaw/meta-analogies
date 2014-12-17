@@ -102,12 +102,14 @@ function CIsBetweenAAndB(C, A_box, B_box) {
 	var lineSet1 = getTopLeftBottomRightLineSet(A_box, B_box)
 	   ,lineSet2 = getBottomLeftTopRightLineSet(A_box, B_box);
 	var lineSet;
+	var cCenter = getCenterOf(C);
 	if (A_box.topLeft.x===B_box.topLeft.x || A_box.topLeft.y===B_box.topLeft.y) {
 		lineSet = lineSet1;
 	} else {
 		lineSet = getWidestArea(lineSet1, lineSet2);
 	}
-	return inBetween(getCenterOf(C), lineSet);
+	return inBetween(cCenter, lineSet) && ((A_box.topRight.x < cCenter.x && cCenter.x < B_box.topLeft.x)
+		                                     || (A_box.bottomLeft.y < cCenter.y && cCenter.y < B_box.topLeft.y));
 }
 
 function CSharesAPropertyWithA(C, A) {
