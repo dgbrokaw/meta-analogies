@@ -19,12 +19,6 @@
 
 <script>
 
-// TODO:
-// have selectedRock
-// around selectedRock, have resize tool around it
-// when dragging, also drag the resize tool
-// lock vertical position of resize tool when not dragging rock
-
 // resize interaction:
 // 		there is a rectangle with a thin border around the rock
 // 		on the right side of that rectangle, there is a small rectangle
@@ -66,18 +60,6 @@ var setupBoard = function() {
 	   .classed('noselect', true);
 }
 
-var setupButtonZone = function() {
-	var svg = d3.select('#board').append('svg')
-		 .attr('id', 'buttonZone')
-	   .style('fill', boardColor)
-	   .attr({width: buttonZoneWidth, height: buttonZoneHeight})
-	   .attr({x: buttonZoneX, y: buttonZoneY});
-
-	svg.append('rect')
-	   .style('fill', boardColor)
-	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
-}
-
 var setupControlRockZone = function() {
 	d3.select('#board').append('rect')
 		 .attr('id', 'controlZone')
@@ -97,7 +79,6 @@ var setupUserRockZone = function() {
 }
 
 setupBoard();
-setupButtonZone();
 setupControlRockZone();
 setupUserRockZone();
 
