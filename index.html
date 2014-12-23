@@ -19,6 +19,15 @@
 
 <script>
 
+// resize tools:
+// 		instead of having a resize handle that changes places depending on which rock
+// 		is selected, every rock should be able to be resized at any time.
+// 		currently, you have to click on a rock before you can resize it.
+//
+// 		Do this by having another square inside every rock (scaled to the size of the rock)
+// 		in the bottom-right corner of the rock.  pulling on that square will then append the
+// 		"resize box."
+
 // resize interaction:
 // 		there is a rectangle with a thin border around the rock
 // 		on the right side of that rectangle, there is a small rectangle
@@ -127,7 +136,7 @@ var setupNextButtonListener = function() {
 
 setupNextButtonListener();
 
-var dragThreshold = 1;
+//var dragThreshold = 1;
 var initialX = null, initialY = null;
 
 function dragstart(d) {
@@ -139,9 +148,9 @@ function dragstart(d) {
 		initialX = d3.event.x, initialY = d3.event.y;
 		// console.log(initialX, initialY);
 	}
-  selectedRock = {rock: rock, rock_sel: rock_sel};
-  appendResizeTool();
-  resizeBox.handle.remove();
+  selectedRock = {rock: rock, rock_sel: rock_sel, handle_sel: [[rock.getHandle()]]};
+  // appendResizeTool();
+  // resizeBox.handle.remove();
   showNeutral('#controlZone');
   showNeutral('#userZone');
 }
@@ -151,11 +160,15 @@ function dragmove(d) {
     .attr("x", d.x = d3.event.x)
     .attr("y", d.y = d3.event.y);
 
-  if (resizeBox.box) {
-  	resizeBox.box
-  		.attr("x", d.x)
-  		.attr("y", d.y);
-  }
+  selectedRock.handle_sel
+  	.attr('x', selectedRock.rock.x+selectedRock.rock.width*4/5)
+  	.attr('y', selectedRock.rock.y+selectedRock.rock.height*4/5);
+
+  // if (resizeBox.box) {
+  // 	resizeBox.box
+  // 		.attr("x", d.x)
+  // 		.attr("y", d.y);
+  // }
 }
 
 function dragend(d) {
@@ -163,8 +176,8 @@ function dragend(d) {
 	//console.log(rock.x, rock.y);
 	displayUserFeedback();
 	initialX = null, initialY = null;
-	clearPreviewLines()
-	appendResizeTool();
+	// clearPreviewLines()
+	// appendResizeTool();
 }
 
 var setupD3Drag = function() {
@@ -177,7 +190,98 @@ var setupD3Drag = function() {
 }
 
 var board = d3.select('#board');
-var resizeInitialX;
+var resizeInitialX
+   ,resizeInitialY;
+
+function resizeDragstart(d) {
+	resizeInitialX = d3.event.x;
+	resizeInitialY = d3.event.y;
+	var handle_sel = d3.select(this);
+	var rock = collection.getRockByHandle(handle_sel[0]);
+	selectedRock = {rock: rock, rock_sel: [[rock.getSVG()]], handle_sel: handle_sel};
+	resizeBox.box = appendResizeBox(rock);
+	resizeBox.otherSizes = getOtherSizes(selectedRock.rock.type);
+}
+
+function resizeDragmove(d) {
+	var diffX = d3.event.x - (selectedRock.rock.x + selectedRock.rock.width)
+	   ,diffY = d3.event.y - (selectedRock.rock.y + selectedRock.rock.height);
+	var diff = diffX > diffY ? diffX : diffY;
+	var handle_sel = d3.select(this)
+		.attr('x', d.x += diff)
+		.attr('y', d.y += diff);
+	resizeBox.box
+		.attr('width', selectedRock.rock.width+diff)
+		.attr('height', selectedRock.rock.height+diff);
+	resizeBox.box.datum({x: selectedRock.rock.x
+		                  ,y: selectedRock.rock.y
+		                  ,width: selectedRock.rock.width+diff
+		                  ,height: selectedRock.rock.height+diff})
+	if (!resizeBox.previewBox1) {
+		appendPreviewBoxes();
+	}
+	var newSize;
+	if (newSize = resizeBoxInRangeOfOtherSize()) {
+		selectedRock.rock.type = newSize.type;
+		selectedRock.rock.updateSize();
+		selectedRock.rock_sel
+			.attr('width', selectedRock.rock.width)
+			.attr('height', selectedRock.rock.height);
+		selectedRock.rock_sel.datum({id: selectedRock.rock.ID
+		                            ,type: selectedRock.rock.type
+		                            ,color: selectedRock.rock.color
+		                            ,x: selectedRock.rock.x
+		                            ,y: selectedRock.rock.y
+		                            ,w: selectedRock.rock.width
+		                            ,h: selectedRock.rock.height});
+		displayUserFeedBack();
+		clearPreviewBoxes();
+		resizeBox.otherSizes = getOtherSizes(selectedRock.rock.type);
+		appendPreviewBoxes();
+	}
+}
+
+function resizeDragend(d) {
+	d3.select('#resizeBox').remove();
+	clearPreviewBoxes();
+	var handle_sel = d3.select(this)
+		.datum({id: selectedRock.rock.id+'handle'
+					 ,x: selectedRock.rock.x+selectedRock.rock.width*4/5, y: selectedRock.rock.y+selectedRock.rock.height*4/5
+					 ,width: selectedRock.rock.width/5, height: selectedRock.rock.height/5})
+		.attr('x', selectedRock.rock.x+selectedRock.rock.width*4/5)
+		.attr('y', selectedRock.rock.y+selectedRock.rock.height*4/5)
+		.attr('width', selectedRock.rock.width/5)
+		.attr('height', selectedRock.rock.height/5);
+	d.x = selectedRock.rock.x+selectedRock.rock.width*4/5;
+	d.y = selectedRock.rock.y+selectedRock.rock.height*4/5;
+	d.width = selectedRock.rock.width/5;
+	d.height = selectedRock.rock.height/5;
+}
+
+function appendPreviewBoxes() {
+	otherSizes = getOtherSizes(selectedRock.rock.type);
+	var box1 = board.append('rect')
+		.attr({x: selectedRock.rock.x, y: selectedRock.rock.y
+		      ,width: resizeBox.otherSizes[0].width, height: resizeBox.otherSizes[0].height})
+		.attr({'stroke-width': 1, 'stroke': 'black', opacity: 0.5});
+	var box2 = board.append('rect')
+		.attr({x: selectedRock.rock.x, y: selectedRock.rock.y
+					,width: resizeBox.otherSizes[1].width, height: resizeBox.otherSizes[1].height})
+		.attr({'stroke-width': 1, 'stroke': 'black', opacity: 0.5});
+	resizeBox.previewBox1 = box1;
+	resizeBox.previewBox2 = box2;
+}
+
+function clearPreviewBoxes() {
+	if (resizeBox.previewBox1) {
+		resizeBox.previewBox1.remove();
+		delete resizeBox.previewBox1;
+	}
+	if (resizeBox.previewBox2) {
+		resizeBox.previewBox2.remove();
+		delete resizeBox.previewBox2;
+	}
+}
 
 function resizeDragmove(d) {
 	if (!resizeInitialX) {
@@ -234,11 +338,21 @@ function clearPreviewLines() {
 	}
 }
 
-function resizeBoxInRangeOfOtherSize(circle_sel) {
-	var x = circle_sel.data()[0].x;
+// function resizeBoxInRangeOfOtherSize(circle_sel) {
+// 	var x = circle_sel.data()[0].x;
+// 	var halfBorderThickness = 3;
+// 	for (var i=0; i<resizeBox.otherSizes.length; i++) {
+// 		if (aboutEqual(x, selectedRock.rock.x+resizeBox.otherSizes[i].width, 3))
+// 			return resizeBox.otherSizes[i];
+// 	}
+// 	return false
+// }
+
+function resizeBoxInRangeOfOtherSize() {
+	var width = resizeBox.box.datum().width;
 	var halfBorderThickness = 3;
 	for (var i=0; i<resizeBox.otherSizes.length; i++) {
-		if (aboutEqual(x, selectedRock.rock.x+resizeBox.otherSizes[i].width, 3))
+		if (aboutEqual(width, resizeBox.otherSizes[i].width, 3))
 			return resizeBox.otherSizes[i];
 	}
 	return false
@@ -260,6 +374,7 @@ function resizeDragend(d) {
 var setupResizeDrag = function() {
 	var resizeDrag = d3.behavior.drag()
 		.origin(function(d) { return d; })
+		//.on('dragstart', resizeDragstart)
 		.on('drag', resizeDragmove)
 		.on('dragend', resizeDragend);
 	return resizeDrag;
@@ -290,6 +405,27 @@ var syncSVGsToCollection = function(sel) {
 	svgs = svgs.filter(function(svg) {return svg});
 	for (var i=rocks.length-svgs.length; i<rocks.length; i++) {
 		rocks[i].setSVG(svgs[i-(rocks.length-svgs.length)]);
+	}
+}
+
+var setupResizeHandles = function() {
+	var rocks = collection.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		var rock = rocks[i], svg = d3.select(rock.getSVG());
+		var handle = svg.append('rect')
+										.datum({id: rock.id+'handle'
+											     ,x: rock.x+rock.width*4/5, y: rock.y+rock.height*4/5
+										       ,width: rock.width/5, height: rock.height/5})
+										.attr('class', 'handle')
+										.attr('id', function(d){return d.id})
+										.attr('width', function(d){return d.width})
+										.attr('height', function(d){return d.height})
+										.attr('x', function(d){return d.x})
+										.attr('y', function(d){return d.y})
+										.style('fill', rockColors[rock.color])
+										.attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 0.5})
+										.call(resizeToolDrag);
+		rock.setHandle(handle[0]);
 	}
 }
 
@@ -388,6 +524,7 @@ var showNeutral = function(zoneID) {
 rockDrag = setupD3Drag();
 setupRocks();
 setupRockDblClickListeners();
+setupResizeHandles();
 
 function appendResizeTool() {
 	if (selectedRock) {
@@ -398,11 +535,27 @@ function appendResizeTool() {
 	}
 }
 
-function appendResizeBox() {
+// function appendResizeBox() {
+// 	var box = d3.select('#board').append('rect')
+// 		.attr('id', 'resizeBox')
+// 		.attr({x: selectedRock.rock.x, y: selectedRock.rock.y
+// 		      ,width: selectedRock.rock.width, height: selectedRock.rock.height})
+// 		.attr({'stroke-width': 1, 'stroke': 'black'})
+// 		.style({fill: 'none'});
+// 	return box;
+// }
+
+function appendResizeBox(rock) {
 	var box = d3.select('#board').append('rect')
+		.data([{x: rock.x
+		       ,y: rock.y
+		       ,width: rock.width
+		       ,height: rock.height}])
 		.attr('id', 'resizeBox')
-		.attr({x: selectedRock.rock.x, y: selectedRock.rock.y
-		      ,width: selectedRock.rock.width, height: selectedRock.rock.height})
+		.attr('x', function(d){return d.x})
+		.attr('y', function(d){return d.y})
+		.attr('width', function(d){return d.width})
+		.attr('height', function(d){return d.height})
 		.attr({'stroke-width': 1, 'stroke': 'black'})
 		.style({fill: 'none'});
 	return box;
