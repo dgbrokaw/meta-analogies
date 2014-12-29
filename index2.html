@@ -198,37 +198,38 @@ function setupRocks() {
 		rock.setGroupSelection(groupSelection);
 		rock.setRockSelection(rockSelection);
 		rock.setHandleSelection(handleSelection);
-		// groupSelection.on('dblclick', dblclickRock)
+		groupSelection.on('dblclick', dblclickRock)
 	}
 	displayUserFeedback();
 }
 
-function dblclickRock() {
+var dblclickRock = function() {
 	var rock = collection.getRockByElement(this);
 	changeRockColor(rock);
 }
 
 function changeRockColor(rock) {
 	rock.color = (rock.color+1)%3;
-	rock.getGroupSVG().datum(rock.getData());
-	rock.getRockSVG().style('fill', function(d) { return d.c });
-	rock.getHandleSVG().style('fill', function(d) { return d.c });
+	rock.getRockSelection().style('fill', rockColors[rock.color]);
+	rock.getHandleSelection().style('fill', rockColors[rock.color]);
 }
 
 var draggedRock = null;
+var firstUpdate = true;
 
 function rockDragstart(d) {
 	var rock_sel = d3.select(this);
 	draggedRock = collection.getRockBySelection(rock_sel);
-	showNeutral('#controlZone');
-  showNeutral('#userZone');
+  firstUpdate = true;
 }
 
 function rockDragmove(d) {
-	// rock.setXY(d3.event.x, d3.event.y);
-	// rock.getGroupSelection().datum(rock.getData());
-	// console.log('data', d.x, d.y);
-	// console.log('event', d3.event.x, d3.event.y);
+	if (firstUpdate) {
+		showNeutral('#controlZone');
+  	showNeutral('#userZone');
+  	firstUpdate = false;
+  	d.c = draggedRock.color;
+	}
 	d.x = d3.event.x;
 	d.y = d3.event.y;
 	draggedRock.getRockSelection()
@@ -294,11 +295,6 @@ function resizeDragend(d) {
 	var newStats = resizeBox.rock.getData();
 	d.w = newStats.w;
 	d.h = newStats.h;
-	// resizeBox.rock.getGroupSelection()
-	// 	.datum(resizeBox.rock.getData());
-	// resizeBox.rock.getRockSelection()
-	// 	.attr('width', function(d) { return d.w })
-	// 	.attr('height', function(d) { return d.h });
 	resizeBox.rock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 })
