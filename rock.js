@@ -95,6 +95,7 @@ RockCollection.prototype.extendCollection = function(data) {
 		rock.setXY(datum.x, datum.y);
 		rock.updateSize();
 		this.rocks.push(rock);
+		if (datum.color) rock.color = datum.color;
 	}
 }
 

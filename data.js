@@ -17,6 +17,22 @@ var benchRockData = [{type: 'small', x: 800, y: 100}
                                    ,{type: 'large', x: 158, y: 225}]
                                   ,[{type: 'medium', x: 519-350 , y: 227}
                                    ,{type: 'large', x: 458-350, y: 277}
-                                   ,{type: 'large', x: 529-350, y: 277}]]};
+                                   ,{type: 'large', x: 529-350, y: 277}]]}
+
+  ,x1 = testRockZoneX
+  ,y1 = testRockZoneY
+  ,testRockSetupData = [{category: "dunno"
+                        ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}
+                                ,{type: 'medium', color: 1, x: x1+50, y: y1+150}
+                                ,{type: 'small', color: 2, x: x1+50, y: y1+220}]
+                        ,answer: "no"
+                        ,response: null}
+                       ,{category: "dunno"
+                        ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}
+                                ,{type: 'medium', color: 2, x: x1+50, y: y1+150}
+                                ,{type: 'small', color: 2, x: x1+50, y: y1+220}]
+                        ,answer: "yes"
+                        ,response: null}];
 
 var currentExample = 0;
+var currentTest = 0;
