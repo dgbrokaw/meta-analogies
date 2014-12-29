@@ -159,7 +159,7 @@ RockCollection.prototype.removeRock = function(rock) {
 
 RockCollection.prototype.clearCollection = function() {
 	for (var i=0; i<this.rocks.length; i++) {
-		this.rocks[i].getSVG().remove();
+		this.rocks[i].getGroupSelection().remove();
 	}
 	this.rocks = [];
 }

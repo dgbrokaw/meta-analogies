@@ -85,19 +85,47 @@ function setupUserRockZone() {
 	   .classed('noselect', true);
 }
 
+function setupRefreshButton() {
+	var board = d3.select('#board');
+	var button = board.append('g')
+				.attr('id', 'refreshButton');
+	button.append('ellipse')
+		.attr('id', 'refreshButtonRect')
+		.style({fill: activatedButtonColor})
+		.attr({cx: refreshButtonCX, cy: refreshButtonCY, rx: buttonWidth, ry: buttonHeight});
+	button.append('text')
+		.style({fill: 'rgb(240,240,240)', stroke: 'none', 'font-family': 'sans-serif', 'font-style':'bold', 'font-size': 32})
+		.attr({x: refreshButtonCX-buttonWidth*2/8, y: refreshButtonCY+buttonHeight/5})
+		.text("Refresh");
+}
+
+function clickRefresh() {
+	collection.clearCollection();
+	collection.extendCollection(rockSetupData);
+	collection.extendCollection(exampleRockSetupData.data[currentExample]);
+	collection.extendCollection(benchRockData);
+	setupRocks();
+	displayUserFeedback();
+}
+
+function setupRefreshButtonListener() {
+	var button = d3.select('#refreshButton');
+	button.on('click', clickRefresh);
+}
+
 function setupNextButton() {
 	var board = d3.select('#board');
 	var button = board.append('g')
 				.attr('id', 'nextButton');
-  button.append('rect')
+  button.append('ellipse')
 		.attr('id', 'nextButtonRect')
 		.style({fill: buttonPushedColor})
-		.attr('width', buttonWidth)
-		.attr('height', buttonHeight)
-		.attr({x: nextButtonX, y: nextButtonY});
+		.attr({cx: nextButtonCX, cy: nextButtonCY, rx: buttonWidth, ry: buttonHeight});
 	button.append('text')
-		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'italic', 'font-size': 12})
-		.attr({x: nextButtonX+10, y: nextButtonY+15});
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'bold', 'font-size': 32})
+		.attr({x: nextButtonCX-buttonWidth*3/7, y: nextButtonCY+buttonHeight/5})
+		//.attr({x: nextButtonX+10, y: nextButtonY+15})
+		.text("Next example");
 }
 
 function clickNext() {
@@ -109,7 +137,7 @@ function clickNext() {
 		collection.extendCollection(benchRockData);
 		setupRocks();
 		displayUserFeedback();
-		setIncorrect();
+		// setIncorrect();
 	}
 }
 
@@ -119,7 +147,7 @@ function setupNextButtonListener() {
 }
 
 var activateNextButton = function() {
-	d3.select('#nextButtonRect').style({fill: buttonColor});
+	d3.select('#nextButtonRect').style({fill: activatedButtonColor});
 }
 
 var deactivateNextButton = function() {
@@ -129,8 +157,10 @@ var deactivateNextButton = function() {
 var board = setupBoard();
 setupControlRockZone();
 setupUserRockZone();
+setupRefreshButton();
 setupNextButton();
 setupNextButtonListener();
+setupRefreshButtonListener();
 
 function setupRockDrag() {
 	var rockDrag = d3.behavior.drag()
@@ -207,6 +237,7 @@ function setupRocks() {
 var dblclickRock = function() {
 	var rock = collection.getRockByElement(this);
 	changeRockColor(rock);
+	displayUserFeedback();
 }
 
 function changeRockColor(rock) {
