@@ -239,8 +239,8 @@ function rockDragmove(d) {
 }
 
 function rockDragend(d) {
-	displayUserFeedback();
 	draggedRock.setXY(d.x, d.y);
+	displayUserFeedback();
 }
 
 var resizeBox = {};
@@ -385,7 +385,6 @@ function resizeBoxInRangeOfOtherSize() {
 	var width = resizeBox.width+resizeBox.offset;
 	var halfBorderThickness = 3;
 	for (var i=0; i<resizeBox.otherSizes.length; i++) {
-		console.log('resizeBox width', width, 'other Size width', resizeBox.otherSizes[i].width);
 		if (aboutEqual(width, resizeBox.otherSizes[i].width, 3))
 			return resizeBox.otherSizes[i];
 	}

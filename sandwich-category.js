@@ -48,6 +48,17 @@ var getRocksWithinUserZoneWindow = function() {
 	return rocksWithinWindow;
 }
 
+function rockSpaceIsWithinWindowSpace(rockSpace, windowSpace) {
+	return (windowSpace.x1<rockSpace.x1
+			 && windowSpace.y1<rockSpace.y1
+			 && rockSpace.x2<windowSpace.x2
+			 && rockSpace.y2<windowSpace.y2);
+}
+
+// I go by rocks, and see if that rock (plus other rocks) satisfies the category.
+// But instead, I should find 'rock chains' and see if any of them satisfy the category.
+// The rock chain has to be an isolated chain and satisfy the specifications.
+
 var rockSatisfiesSandwichCategory = function(rockIDX) {
 	var satisfies = false;
 	var A = rocks[rockIDX]
@@ -56,7 +67,7 @@ var rockSatisfiesSandwichCategory = function(rockIDX) {
 		if (i!==rockIDX) {
 			var B = rocks[i]
 			   ,B_box = getCornersOf(B);
-			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box)) {
+			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box) && notOnExtremeDiagonal(A, B)) {
 				var rocksInBetween = findRocksBetween(A, B, A_box, B_box);
 				if (rocksInBetween.length>0) {
 					satisfies = true;
@@ -79,23 +90,71 @@ function enoughSpaceBetween(A, B) {
 	return false;
 }
 
+// return false if the vector AB's angle between either the x or y unit vectors is not within 10 degrees (0.174532925 radians).
+function notOnExtremeDiagonal(A, B) {
+	var AB = getVectorBetweenRocks(A, B);
+	var ABVerticalAngle = getAngleToYUnitVector(AB);
+	var ABHorizontalAngle = getAngleToXUnitVector(AB);
+	if (ABVerticalAngle > 0.174532925 && ABVerticalAngle < 2.96705972859 && ABHorizontalAngle > 0.174532925 && ABHorizontalAngle < 2.96705972859) return false;
+	return true;
+}
+
+function getVectorBetweenRocks(A, B) {
+	var ACenter = getCenterOf(A)
+	   ,BCenter = getCenterOf(B);
+	var AB = {x: BCenter.x - ACenter.x, y: BCenter.y - ACenter.y};
+	return AB;
+}
+
+function getAngleToYUnitVector(v) {
+	var dotProductWithYUnitVector = v.y;
+	var magnitude = Math.pow(Math.pow(v.x,2)+Math.pow(v.y,2), 1/2);
+	var cosineAngle = dotProductWithYUnitVector/magnitude;
+	var angle = Math.acos(cosineAngle);
+	return angle;
+}
+
+function getAngleToXUnitVector(v) {
+	var dotProductWithXUnitVector = v.x;
+	var magnitude = Math.pow(Math.pow(v.x,2)+Math.pow(v.y,2), 1/2);
+	var cosineAngle = dotProductWithXUnitVector/magnitude;
+	var angle = Math.acos(cosineAngle);
+	return angle;
+}
+
 // Returns a list of rocks between the rocks A and B if all of them share a property with rock A.
 // If any of them does not share a property with A, then an empty list is returned.
+// If the shortest distance from one "bookend" to the first between-rock is greater than the size of a large rock, the empty list is return
 function findRocksBetween(A, B, A_box, B_box) {
 	var rs = [];
+	var closestDistanceToA = null;
+	var closestDistanceToB = null;
 	for (var i=0; i<rocks.length; i++) {
 		var C = rocks[i];
 		if (C.ID!=A.ID && C.ID!=B.ID) {
 			if (!rectOverlap(A, C) && !rectOverlap(B, C) && CIsBetweenAAndB(C, A_box, B_box)) {
 				if (CSharesAPropertyWithA(C, A)) {
 					rs.push(C);
+					// var distanceFromAToC = distanceBetweenRocks(A, C)
+					//    ,distanceFromBToC = distanceBetweenRocks(B, C);
+					// if (!closestDistanceToA || distanceFromAToC < closestDistanceToA) closestDistanceToA = distanceFromAToC;
+					// if (!closestDistanceToB || distanceFromBToC < closestDistanceToB) closestDistanceToB = distanceFromBToC;
 				} else {
 					return [];
 				}
 			}
 		}
 	}
+	if (closestDistanceToA > largeRockHeight || closestDistanceToB > largeRockHeight) return [];
 	return rs;
+}
+
+function distanceBetweenRocks(A, B) {
+	var ACenter = [A.x+A.width/2, A.y+A.height/2]
+	   ,BCenter = [B.x+B.width/2, B.y+B.height/2];
+	var t1 = Math.pow(BCenter[0]-ACenter[0], 2)
+	   ,t2 = Math.pow(BCenter[1]-ACenter[1], 2);
+	return Math.pow(t1+t2, 1/2) - A.height/2 - B.height/2;
 }
 
 function CIsBetweenAAndB(C, A_box, B_box) {
