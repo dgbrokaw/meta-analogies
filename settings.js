@@ -24,14 +24,15 @@ var scale = 1
    ,buttonHeight = boardHeight/10*3/4//= buttonZoneHeight*3/4
    ,buttonWidth = boardWidth*6/10*1/4//= buttonZoneWidth*1/4
 
+   ,activatedButtonColor = 'rgb(150,150,200)'
    ,buttonColor = 'rgb(150,150,150)'
-   ,buttonPushedColor = 'rgb(100,100,100)'
+   ,buttonPushedColor = 'rgb(25,25,50)'
 
-   ,refreshButtonX = boardWidth*1/3
-   ,refreshButtonY = boardHeight-buttonHeight
+   ,refreshButtonCX = controlRockZoneX+rockZoneWidth/2
+   ,refreshButtonCY = controlRockZoneY+rockZoneHeight+(boardHeight-controlRockZoneY-rockZoneHeight)/2
 
-   ,nextButtonX = boardWidth*1/2
-   ,nextButtonY = boardHeight-buttonHeight
+   ,nextButtonCX = userRockZoneX+rockZoneWidth/2//boardWidth*1/2
+   ,nextButtonCY = controlRockZoneY+rockZoneHeight+(boardHeight-controlRockZoneY-rockZoneHeight)/2
 
    // rock stats
    ,rockColors = ['rgb(25,5,5)'
