@@ -200,6 +200,7 @@ function setupRocks() {
 		rock.setHandleSelection(handleSelection);
 		// groupSelection.on('dblclick', dblclickRock)
 	}
+	displayUserFeedback();
 }
 
 function dblclickRock() {
@@ -391,7 +392,7 @@ function resizeBoxInRangeOfOtherSize() {
 	return false
 }
 
-var displayUserFeedback = function() {
+function displayUserFeedback() {
 	checkControlWindow();
 	checkUserWindow();
 }
