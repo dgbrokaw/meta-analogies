@@ -1,0 +1,154 @@
+<!doctype html>
+
+<title>Meta-analogies (rocks)</title>
+<script src='d3.min.js'></script>
+<script src='settings.js'></script>
+<script src='phase2-settings.js'></script>
+<script src='rock.js'></script>
+<script src='support-category.js'></script>
+<script src='sandwich-category.js'></script>
+<script src='data.js'></script>
+
+<style>
+.noselect {
+	-webkit-user-select:none;
+}
+</style>
+
+<body>
+</body>
+
+<script>
+
+var collection = new RockCollection();
+collection.extendCollection(testRockSetupData[currentTest].rocks);
+var response = null;
+
+function setupBoard() {
+	var svg = d3.select('body').append('svg')
+		.attr('id', 'board')
+		.attr('width', boardWidth)
+		.attr('height', boardHeight)
+		.classed('noselect', true);
+
+	svg.append('rect')
+	   .style('fill', boardColor)
+	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
+	   .classed('noselect', true);
+
+	return svg;
+}
+
+function setupTestRockZone() {
+	d3.select('#board').append('rect')
+		 .attr('id', 'testZone')
+	   .style('fill', rockZoneColor)
+	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: activatedButtonColor})
+	   .attr({x: testRockZoneX, y: testRockZoneY})
+	   .classed('noselect', true);
+}
+
+function setupNoButton() {
+	var board = d3.select('#board');
+	var button = board.append('g')
+				.attr('id', 'noButton');
+	button.append('ellipse')
+		.attr('id', 'noButtonRect')
+		.style({fill: incorrectColor})
+		.attr({cx: noButtonCX, cy: noButtonCY, rx: buttonWidth, ry: buttonHeight});
+	button.append('text')
+		.style({fill: 'rgb(240,240,240)', stroke: 'none', 'font-family': 'sans-serif', 'font-style':'bold', 'font-size': 32})
+		.attr({x: noButtonCX-buttonWidth*1/8, y: noButtonCY+buttonHeight/5})
+		.text("No");
+}
+
+function clickNo() {
+	response = "no";
+	responseGiven();
+}
+
+function setupNoButtonListener() {
+	var button = d3.select('#noButton');
+	button.on('click', clickNo);
+}
+
+function setupYesButton() {
+	var board = d3.select('#board');
+	var button = board.append('g')
+				.attr('id', 'yesButton');
+  button.append('ellipse')
+		.attr('id', 'yesButtonRect')
+		.style({fill: correctColor})
+		.attr({cx: yesButtonCX, cy: yesButtonCY, rx: buttonWidth, ry: buttonHeight});
+	button.append('text')
+		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'bold', 'font-size': 32})
+		.attr({x: yesButtonCX-buttonWidth*1/8, y: yesButtonCY+buttonHeight/5})
+		.text("Yes");
+}
+
+function clickYes() {
+	response = "yes";
+	responseGiven();
+}
+
+function setupYesButtonListener() {
+	var button = d3.select('#yesButton');
+	button.on('click', clickYes);
+}
+
+function createRockGroupSelection(rock) {
+	var d = rock.getData();
+	var rockGroup = board.append('g')
+										.datum(d)
+										.attr('id', rock.getID()+'group');
+	return rockGroup;
+}
+
+function createRockSelection(rock, group) {
+	var r = group.append('rect')
+						.attr('id', rock.getID())
+						.attr('x', function(d) { return d.x })
+						.attr('y', function(d) { return d.y })
+						.attr('width', function(d) { return d.w })
+						.attr('height', function(d) { return d.h })
+						.style('fill', function(d) { return rockColors[d.c] })
+		    		.attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 1})
+		    		.style('fill-opacity', 0.75);
+  return r;
+}
+
+function setupRocks() {
+	var rocks = collection.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		var rock = rocks[i];
+		var groupSelection = createRockGroupSelection(rock);
+		var rockSelection = createRockSelection(rock, groupSelection);
+		rock.setGroupSelection(groupSelection);
+		rock.setRockSelection(rockSelection);
+	}
+}
+
+function responseGiven() {
+	collectData();
+	console.log(testRockSetupData[currentTest]);
+	currentTest++;
+	collection.clearCollection();
+	if (currentTest<testRockSetupData.length) {
+		collection.extendCollection(testRockSetupData[currentTest].rocks);
+		setupRocks();
+	}
+}
+
+function collectData() {
+	testRockSetupData[currentTest].response = response;
+}
+
+var board = setupBoard();
+setupTestRockZone();
+setupNoButton();
+setupNoButtonListener();
+setupYesButton();
+setupYesButtonListener();
+setupRocks();
+
+</script>
