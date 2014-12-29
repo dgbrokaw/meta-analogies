@@ -34,9 +34,9 @@ var scale = 1
    ,nextButtonY = boardHeight-buttonHeight
 
    // rock stats
-   ,rockColors = ['rgb(60,25,25)'
-                 ,'rgb(150,155,150)'
-                 ,'rgb(225,225,255)']
+   ,rockColors = ['rgb(25,5,5)'
+                 ,'rgb(140,150,140)'
+                 ,'rgb(240,240,255)']
 
    ,smallRockHeight = 30
    ,smallRockWidth = smallRockHeight
