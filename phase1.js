@@ -214,6 +214,9 @@ var dblclickRock = function() {
 	var rock = collection.getRockByElement(this);
 	changeRockColor(rock);
 	displayUserFeedback();
+	// double-clicks end up recording two drag events, which are meaningless data.  here we remove those.
+	game.record.push();
+	game.record.push();
 	collectPhaseOneData('color');
 }
 
