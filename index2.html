@@ -3,9 +3,12 @@
 <title>Meta-analogies (rocks)</title>
 <script src='d3.min.js'></script>
 <script src='settings.js'></script>
+<script src='phase2-settings.js'></script>
+<script src='setup-data.js'></script>
 <script src='rock.js'></script>
 <script src='support-category.js'></script>
 <script src='sandwich-category.js'></script>
+<script src='game.js'></script>
 <script src='data.js'></script>
 
 <style>
@@ -21,11 +24,10 @@
 
 var collection = new RockCollection();
 collection.extendCollection(rockSetupData);
-collection.extendCollection(exampleRockSetupData.data[currentExample]);
+collection.extendCollection(stimuli.data[currentExample]);
 collection.extendCollection(benchRockData);
 
 var selectedRock = null;
-
 var correct = false;
 
 function setCorrect() {
@@ -100,9 +102,10 @@ function setupRefreshButton() {
 }
 
 function clickRefresh() {
+	collectData('refresh')
 	collection.clearCollection();
 	collection.extendCollection(rockSetupData);
-	collection.extendCollection(exampleRockSetupData.data[currentExample]);
+	collection.extendCollection(stimuli.data[currentExample]);
 	collection.extendCollection(benchRockData);
 	setupRocks();
 	displayUserFeedback();
@@ -129,14 +132,16 @@ function setupNextButton() {
 }
 
 function clickNext() {
-	if (correct && currentExample<exampleRockSetupData.data.length-1) {
+	if (correct && currentExample<stimuli.data.length-1) {
+		collectData('next')
 		collection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
-		collection.extendCollection(exampleRockSetupData.data[currentExample]);
+		collection.extendCollection(stimuli.data[currentExample]);
 		collection.extendCollection(benchRockData);
 		setupRocks();
 		displayUserFeedback();
+		collectData('start');
 		// setIncorrect();
 	}
 }
@@ -238,6 +243,7 @@ var dblclickRock = function() {
 	var rock = collection.getRockByElement(this);
 	changeRockColor(rock);
 	displayUserFeedback();
+	collectData('color');
 }
 
 function changeRockColor(rock) {
@@ -275,6 +281,7 @@ function rockDragmove(d) {
 function rockDragend(d) {
 	draggedRock.setXY(d.x, d.y);
 	displayUserFeedback();
+	collectData('drag');
 }
 
 var resizeBox = {};
@@ -314,6 +321,7 @@ function resizeDragmove(d) {
 			.attr('width', function(d) { return d.w })
 			.attr('height', function(d) { return d.h });
 		displayUserFeedback();
+		collectData('resize');
 		clearPreviewBoxes();
 		resizeBox.otherSizes = getOtherSizes(resizeBox.rock.type);
 		appendPreviewBoxes(resizeBox.rock);
@@ -445,6 +453,28 @@ function checkUserWindow() {
 		setIncorrect();
 		deactivateNextButton();
 	}
+}
+
+var game = new Game();
+game.setSubjectID(1);
+var date = new Date();
+var time = date.getTime();
+collectData('start');
+
+function collectData(action) {
+	var d = new Date();
+	var dataRow = new Row();
+	dataRow.subjectID = game.getSubjectID();
+	dataRow.date = d.toDateString();
+	dataRow.t = d.toTimeString();
+	dataRow.stimulusNum = currentExample;
+	dataRow.stimulus = stimuli.data[currentExample];
+	dataRow.userRocks = getRocksWithinUserZoneWindow();
+	dataRow.userAction = action;
+	dataRow.categorySatisfied = correct;
+
+	console.log(dataRow);
+	game.addRow(dataRow);
 }
 
 </script>
