@@ -237,8 +237,6 @@ function rockDragstart(d) {
 
 function rockDragmove(d) {
 	if (firstUpdate) {
-		showNeutral('#controlZone');
-  	showNeutral('#userZone');
   	firstUpdate = false;
   	d.c = draggedRock.color;
 	}
@@ -250,11 +248,11 @@ function rockDragmove(d) {
 	draggedRock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 });
+	draggedRock.setXY(d.x, d.y);
+	displayUserFeedback();
 }
 
 function rockDragend(d) {
-	draggedRock.setXY(d.x, d.y);
-	displayUserFeedback();
 	collectPhaseOneData('drag');
 }
 
