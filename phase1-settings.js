@@ -1,3 +1,6 @@
+var collection = new RockCollection();
+var game = new Game();
+
 var scale = 1
 
    // board stats
@@ -52,19 +55,3 @@ var scale = 1
 
    ,rockDrag
    ,resizeToolDrag
-
-   // ,buttonZoneHeight = boardHeight/10
-   // ,buttonZoneWidth = boardWidth*6/10
-   // ,buttonZoneX = boardWidth*3/40
-   // ,buttonZoneY = 25
-
-   // ,colorButtonX = buttonZoneWidth*1/16
-   // ,colorButtonY = (buttonZoneHeight-buttonHeight)/2
-
-   // ,shapeButtonX = colorButtonX + buttonWidth + buttonZoneWidth*1/16
-   // ,shapeButtonY = colorButtonY
-
-   // ,positionButtonX = shapeButtonX + buttonWidth + buttonZoneWidth*1/16
-   // ,positionButtonY = colorButtonY
-
-   // ,currentControlMode = 'color'

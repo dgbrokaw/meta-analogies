@@ -1,30 +1,6 @@
-<!doctype html>
+var currentTest = 0;
 
-<title>Meta-analogies (rocks)</title>
-<script src='d3.min.js'></script>
-<script src='settings.js'></script>
-<script src='phase2-settings.js'></script>
-<script src='rock.js'></script>
-<script src='support-category.js'></script>
-<script src='sandwich-category.js'></script>
-<script src='data.js'></script>
-
-<style>
-.noselect {
-	-webkit-user-select:none;
-}
-</style>
-
-<body>
-</body>
-
-<script>
-
-var collection = new RockCollection();
-collection.extendCollection(testRockSetupData[currentTest].rocks);
-var response = null;
-
-function setupBoard() {
+function setupPhaseTwoBoard() {
 	var svg = d3.select('body').append('svg')
 		.attr('id', 'board')
 		.attr('width', boardWidth)
@@ -63,8 +39,7 @@ function setupNoButton() {
 }
 
 function clickNo() {
-	response = "no";
-	responseGiven();
+	responseGiven("no");
 }
 
 function setupNoButtonListener() {
@@ -87,8 +62,7 @@ function setupYesButton() {
 }
 
 function clickYes() {
-	response = "yes";
-	responseGiven();
+	responseGiven("yes");
 }
 
 function setupYesButtonListener() {
@@ -96,7 +70,8 @@ function setupYesButtonListener() {
 	button.on('click', clickYes);
 }
 
-function createRockGroupSelection(rock) {
+function createPhaseTwoRockGroupSelection(rock) {
+	var board = d3.select('#board');
 	var d = rock.getData();
 	var rockGroup = board.append('g')
 										.datum(d)
@@ -104,7 +79,7 @@ function createRockGroupSelection(rock) {
 	return rockGroup;
 }
 
-function createRockSelection(rock, group) {
+function createPhaseTwoRockSelection(rock, group) {
 	var r = group.append('rect')
 						.attr('id', rock.getID())
 						.attr('x', function(d) { return d.x })
@@ -117,38 +92,55 @@ function createRockSelection(rock, group) {
   return r;
 }
 
-function setupRocks() {
+function setupPhaseTwoRocks() {
 	var rocks = collection.getRocks();
 	for (var i=0; i<rocks.length; i++) {
 		var rock = rocks[i];
-		var groupSelection = createRockGroupSelection(rock);
-		var rockSelection = createRockSelection(rock, groupSelection);
+		var groupSelection = createPhaseTwoRockGroupSelection(rock);
+		var rockSelection = createPhaseTwoRockSelection(rock, groupSelection);
 		rock.setGroupSelection(groupSelection);
 		rock.setRockSelection(rockSelection);
 	}
 }
 
-function responseGiven() {
-	collectData();
-	console.log(testRockSetupData[currentTest]);
+function responseGiven(response) {
+	collectPhaseTwoData(response);
 	currentTest++;
 	collection.clearCollection();
 	if (currentTest<testRockSetupData.length) {
 		collection.extendCollection(testRockSetupData[currentTest].rocks);
-		setupRocks();
+		setupPhaseTwoRocks();
+	} else {
+		teardownPhaseTwo();
 	}
 }
 
-function collectData() {
-	testRockSetupData[currentTest].response = response;
+function collectPhaseTwoData(response) {
+	var d = new Date();
+	var dataRow = new Row();
+	dataRow.subjectID = game.getSubjectID();
+	dataRow.date = d.toDateString();
+	dataRow.t = d.toTimeString();
+	dataRow.stimulusNum = currentTest;
+	dataRow.stimulus = testRockSetupData[currentTest];
+	dataRow.userAction = response;
+
+	console.log(dataRow);
+	game.addRow(dataRow);
 }
 
-var board = setupBoard();
-setupTestRockZone();
-setupNoButton();
-setupNoButtonListener();
-setupYesButton();
-setupYesButtonListener();
-setupRocks();
+function initializePhaseTwo() {
+	setupPhaseTwoBoard();
+	setupTestRockZone();
+	setupNoButton();
+	setupNoButtonListener();
+	setupYesButton();
+	setupYesButtonListener();
 
-</script>
+	collection.extendCollection(testRockSetupData[currentTest].rocks);
+	setupPhaseTwoRocks();
+}
+
+function teardownPhaseTwo() {
+	d3.select('#board').remove();
+}
