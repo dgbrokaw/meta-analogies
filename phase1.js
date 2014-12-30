@@ -304,9 +304,6 @@ function resizeDragmove(d) {
 function resizeDragend(d) {
 	clearPreviewBoxes();
 	resizeBox.box.remove();
-	// var newStats = resizeBox.rock.getData();
-	// d.w = newStats.w;
-	// d.h = newStats.h;
 	resizeBox.rock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 })
