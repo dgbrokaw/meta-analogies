@@ -237,8 +237,6 @@ function rockDragstart(d) {
 
 function rockDragmove(d) {
 	if (firstUpdate) {
-		showNeutral('#controlZone');
-  	showNeutral('#userZone');
   	firstUpdate = false;
   	d.c = draggedRock.color;
 	}
@@ -250,11 +248,11 @@ function rockDragmove(d) {
 	draggedRock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 });
+	draggedRock.setXY(d.x, d.y);
+	displayUserFeedback();
 }
 
 function rockDragend(d) {
-	draggedRock.setXY(d.x, d.y);
-	displayUserFeedback();
 	collectPhaseOneData('drag');
 }
 
@@ -306,9 +304,6 @@ function resizeDragmove(d) {
 function resizeDragend(d) {
 	clearPreviewBoxes();
 	resizeBox.box.remove();
-	var newStats = resizeBox.rock.getData();
-	d.w = newStats.w;
-	d.h = newStats.h;
 	resizeBox.rock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 })
@@ -339,6 +334,7 @@ function appendResizeBox(rock) {
 }
 
 function appendPreviewBoxes(rock) {
+	var board = d3.select('#board');
 	otherSizes = resizeBox.otherSizes;
 	var box1 = board.append('rect')
 		.attr({x: rock.x, y: rock.y
