@@ -1,31 +1,4 @@
-<!doctype html>
-
-<title>Meta-analogies (rocks)</title>
-<script src='d3.min.js'></script>
-<script src='settings.js'></script>
-<script src='phase2-settings.js'></script>
-<script src='setup-data.js'></script>
-<script src='rock.js'></script>
-<script src='support-category.js'></script>
-<script src='sandwich-category.js'></script>
-<script src='game.js'></script>
-<script src='data.js'></script>
-
-<style>
-.noselect {
-	-webkit-user-select:none;
-}
-</style>
-
-<body>
-</body>
-
-<script>
-
-var collection = new RockCollection();
-collection.extendCollection(rockSetupData);
-collection.extendCollection(stimuli.data[currentExample]);
-collection.extendCollection(benchRockData);
+var currentExample = 0;
 
 var selectedRock = null;
 var correct = false;
@@ -102,7 +75,7 @@ function setupRefreshButton() {
 }
 
 function clickRefresh() {
-	collectData('refresh')
+	collectPhaseOneData('refresh')
 	collection.clearCollection();
 	collection.extendCollection(rockSetupData);
 	collection.extendCollection(stimuli.data[currentExample]);
@@ -133,7 +106,7 @@ function setupNextButton() {
 
 function clickNext() {
 	if (correct && currentExample<stimuli.data.length-1) {
-		collectData('next')
+		collectPhaseOneData('next');
 		collection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
@@ -141,8 +114,13 @@ function clickNext() {
 		collection.extendCollection(benchRockData);
 		setupRocks();
 		displayUserFeedback();
-		collectData('start');
+		collectPhaseOneData('start');
 		// setIncorrect();
+	} else if (correct) {
+		collectPhaseOneData('next');
+		collection.clearCollection();
+		teardownPhaseOne();
+		initializePhaseTwo();
 	}
 }
 
@@ -158,14 +136,6 @@ var activateNextButton = function() {
 var deactivateNextButton = function() {
 	d3.select('#nextButtonRect').style("fill", buttonPushedColor);
 }
-
-var board = setupBoard();
-setupControlRockZone();
-setupUserRockZone();
-setupRefreshButton();
-setupNextButton();
-setupNextButtonListener();
-setupRefreshButtonListener();
 
 function setupRockDrag() {
 	var rockDrag = d3.behavior.drag()
@@ -189,6 +159,7 @@ var rockDrag = setupRockDrag();
 var resizeDrag = setupResizeDrag();
 
 function createRockGroupSelection(rock) {
+	var board = d3.select('#board');
 	var d = rock.getData();
 	var rockGroup = board.append('g')
 										.datum(d)
@@ -243,7 +214,10 @@ var dblclickRock = function() {
 	var rock = collection.getRockByElement(this);
 	changeRockColor(rock);
 	displayUserFeedback();
-	collectData('color');
+	// double-clicks end up recording two drag events, which are meaningless data.  here we remove those.
+	game.record.push();
+	game.record.push();
+	collectPhaseOneData('color');
 }
 
 function changeRockColor(rock) {
@@ -281,7 +255,7 @@ function rockDragmove(d) {
 function rockDragend(d) {
 	draggedRock.setXY(d.x, d.y);
 	displayUserFeedback();
-	collectData('drag');
+	collectPhaseOneData('drag');
 }
 
 var resizeBox = {};
@@ -321,7 +295,7 @@ function resizeDragmove(d) {
 			.attr('width', function(d) { return d.w })
 			.attr('height', function(d) { return d.h });
 		displayUserFeedback();
-		collectData('resize');
+		collectPhaseOneData('resize');
 		clearPreviewBoxes();
 		resizeBox.otherSizes = getOtherSizes(resizeBox.rock.type);
 		appendPreviewBoxes(resizeBox.rock);
@@ -349,8 +323,6 @@ function resizeDragend(d) {
 	delete resizeBox.width;
 	delete resizeBox.height;
 }
-
-setupRocks();
 
 function appendResizeBox(rock) {
 	resizeBox.width = rock.width;
@@ -455,13 +427,7 @@ function checkUserWindow() {
 	}
 }
 
-var game = new Game();
-game.setSubjectID(1);
-var date = new Date();
-var time = date.getTime();
-collectData('start');
-
-function collectData(action) {
+function collectPhaseOneData(action) {
 	var d = new Date();
 	var dataRow = new Row();
 	dataRow.subjectID = game.getSubjectID();
@@ -477,4 +443,21 @@ function collectData(action) {
 	game.addRow(dataRow);
 }
 
-</script>
+function initializePhaseOne() {
+	setupBoard();
+	setupControlRockZone();
+	setupUserRockZone();
+	setupRefreshButton();
+	setupNextButton();
+	setupNextButtonListener();
+	setupRefreshButtonListener();
+
+	collection.extendCollection(rockSetupData);
+	collection.extendCollection(stimuli.data[currentExample]);
+	collection.extendCollection(benchRockData);
+	setupRocks();
+}
+
+function teardownPhaseOne() {
+	d3.select('#board').remove();
+}

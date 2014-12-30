@@ -1,6 +1,6 @@
 var Game = function(subjectID) {
 	this.subjectID = subjectID ? subjectID : null;
-	this.stimuli = stimuli;
+	//this.stimuli = stimuli;
 
 	this.record = [];
 }

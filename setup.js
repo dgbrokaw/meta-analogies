@@ -21,15 +21,13 @@ var benchRockData = [{type: 'small', x: 800, y: 100}
 
   ,x1 = testRockZoneX
   ,y1 = testRockZoneY
-  ,testRockSetupData = [{category: "dunno"
+  ,testRockSetupData = [{category: "sandwich"
                         ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}
                                 ,{type: 'medium', color: 1, x: x1+50, y: y1+150}
                                 ,{type: 'small', color: 2, x: x1+50, y: y1+220}]
-                        ,answer: "no"
-                        ,response: null}
-                       ,{category: "dunno"
+                        ,answer: "no"}
+                       ,{category: "sandwich"
                         ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}
                                 ,{type: 'medium', color: 2, x: x1+50, y: y1+150}
                                 ,{type: 'small', color: 2, x: x1+50, y: y1+220}]
-                        ,answer: "yes"
-                        ,response: null}];
+                        ,answer: "yes"}];
