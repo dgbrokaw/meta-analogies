@@ -7,13 +7,13 @@ var benchRockData = [{type: 'small', x: 800, y: 100}
                     ,{type: 'small', x: 800, y: 400}
                     ,{type: 'medium', x: 880, y: 400}]
 
-   ,rockSetupData = [{type: 'small', color: 2, x: 478, y: 188}
+   ,rockSetupData = [{type: 'small', color: 2, x: 478, y: 188, border: 'seagreen'}
     	              ,{type: 'medium', color: 1, x: 600, y: 227}
-    	              ,{type: 'large', color: 0, x: 465, y: 303}]
+    	              ,{type: 'large', color: 0, x: 465, y: 303, border: 'seagreen'}]
 
    ,stimuli = {category: "support"
-              ,data: [[{type: 'small', x: 158, y: 276}
-                      ,{type: 'medium', x: 250, y: 275}
+              ,data: [[{type: 'small', x: 158, y: 276, border: 'seagreen'}
+                      ,{type: 'medium', x: 250, y: 275, border: 'seagreen'}
                       ,{type: 'large', x: 158, y: 225}]
                      ,[{type: 'medium', x: 519-350 , y: 227}
                       ,{type: 'large', x: 458-350, y: 277}
@@ -22,9 +22,9 @@ var benchRockData = [{type: 'small', x: 800, y: 100}
   ,x1 = testRockZoneX
   ,y1 = testRockZoneY
   ,testRockSetupData = [{category: "sandwich"
-                        ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}
+                        ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100, border: 'seagreen'}
                                 ,{type: 'medium', color: 1, x: x1+50, y: y1+150}
-                                ,{type: 'small', color: 2, x: x1+50, y: y1+220}]
+                                ,{type: 'small', color: 2, x: x1+50, y: y1+220, border: 'seagreen'}]
                         ,answer: "no"}
                        ,{category: "sandwich"
                         ,rocks: [{type: 'small', color: 2, x: x1+50, y: y1+100}

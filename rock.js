@@ -23,6 +23,7 @@ Rock.prototype.getID = function() {
 Rock.prototype.setXY = function(x, y) {
 	this.x = x;
 	this.y = y;
+	// console.log('x: '+ this.x + ', y: ' + this.y);
 }
 
 Rock.prototype.updateSize = function() {
@@ -94,6 +95,7 @@ RockCollection.prototype.extendCollection = function(data) {
 		var rock = new Rock(datum.type);
 		rock.setXY(datum.x, datum.y);
 		rock.updateSize();
+		rock.borderColor = datum.border;
 		this.rocks.push(rock);
 		if (datum.color) rock.color = datum.color;
 	}

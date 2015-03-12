@@ -1,4 +1,4 @@
-var testRockZoneX = (boardWidth-rockZoneWidth)/2
+var testRockZoneX = (boardWidth-controlRockZoneWidth)/2
    ,testRockZoneY = controlRockZoneY
 
    ,noButtonCX = boardWidth/3
