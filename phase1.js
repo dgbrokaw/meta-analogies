@@ -46,7 +46,7 @@ function setupControlRockZone() {
 	d3.select('#board').append('rect')
 		 .attr('id', 'controlZone')
 	   .style('fill', rockZoneColor)
-	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: correctColor})
+	   .attr({width: controlRockZoneWidth, height: controlRockZoneHeight, 'stroke-width': '6', stroke: correctColor})
 	   .attr({x: controlRockZoneX, y: controlRockZoneY})
 	   .classed('noselect', true);
 }
@@ -55,7 +55,7 @@ function setupUserRockZone() {
 	d3.select('#board').append('rect')
 		 .attr('id', 'userZone')
 	   .style('fill', rockZoneColor)
-	   .attr({width: rockZoneWidth, height: rockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
+	   .attr({width: userRockZoneWidth, height: userRockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
 	   .attr({x: userRockZoneX, y: userRockZoneY})
 	   .classed('noselect', true);
 }
@@ -168,6 +168,7 @@ function createRockGroupSelection(rock) {
 }
 
 function createRockSelection(rock, group) {
+	console.log(rock.borderColor);
 	var r = group.append('rect')
 						.attr('id', rock.getID())
 						.attr('x', function(d) { return d.x })
@@ -175,7 +176,7 @@ function createRockSelection(rock, group) {
 						.attr('width', function(d) { return d.w })
 						.attr('height', function(d) { return d.h })
 						.style('fill', function(d) { return rockColors[d.c] })
-		    		.attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 1})
+		    		.attr({'stroke-width': 3, 'stroke': (rock.borderColor ? rock.borderColor : 'black'), 'opacity': 1})
 		    		.style('fill-opacity', 0.75)
 		    		.call(rockDrag);
   return r;
@@ -253,7 +254,113 @@ function rockDragmove(d) {
 }
 
 function rockDragend(d) {
+	slideToNonOverlappingPosition(draggedRock, d);
+	displayUserFeedback();
 	collectPhaseOneData('drag');
+}
+
+function slideToNonOverlappingPosition(draggedRock, data) {
+	var slideDirection;
+	var overlappingRock
+	if (overlappingRock = overlappingAnotherRock(draggedRock)) {
+		slideDirection = slideRockInDirection(draggedRock, data, overlappingRock, slideDirection);
+	}
+}
+
+function overlappingAnotherRock(draggedRock) {
+	for (var i=0; i<collection.numberOfRocks(); i++) {
+		var rock = collection.rocks[i];
+		console.log(rectOverlap(draggedRock, rock));
+		if (draggedRock.ID!==rock.ID && rectOverlap(draggedRock, rock)) return rock;
+	}
+	return false;
+}
+
+function slideRockInDirection(draggedRock, data, overlappingRock, slideDirection) {
+	var direction = slideDirection;
+	slideStat = findDirectionAndDistance(draggedRock, overlappingRock, direction);
+
+	var transition;
+	switch (slideStat.direction) {
+		case 'up':
+			var newY = draggedRock.y - slideStat.distance-1;
+			data.y = newY;
+			transition = draggedRock.getRockSelection()
+				.transition()
+				.duration(500)
+				.ease('exp')
+				.attr('y', function(d) { return d.y });
+			break;
+		case 'right':
+			var newX = draggedRock.x + slideStat.distance+1;
+			data.x = newX;
+			transition = draggedRock.getRockSelection()
+				.transition()
+				.duration(500)
+				.ease('exp')
+				.attr('x', function(d) { return d.x });
+			break;
+		case 'down':
+			var newY = draggedRock.y + slideStat.distance+1;
+			data.y = newY;
+			transition = draggedRock.getRockSelection()
+				.transition()
+				.duration(500)
+				.ease('exp')
+				.attr('y', function(d) { return d.y });
+			break;
+		case 'left':
+			var newX = draggedRock.x - slideStat.distance-1;
+			data.x = newX;
+			transition = draggedRock.getRockSelection()
+				.transition()
+				.duration(500)
+				.ease('exp')
+				.attr('x', function(d) { return d.x });
+			break;
+	}
+	draggedRock.setXY(data.x, data.y);
+
+	var overlappingRock2 = overlappingAnotherRock(draggedRock);
+			// console.log('new overlapping rock: ', overlappingRock2)
+	if (overlappingRock2) {
+		setTimeout(function() {
+			slideRockInDirection(draggedRock, data, overlappingRock2, slideStat.direction);
+		}, 500);
+	}
+
+	return direction;
+}
+
+function findDirectionAndDistance(draggedRock, overlappingRock, direction) {
+	var stats = {};
+	// var upDiff = overlappingRock.y - draggedRock.y+draggedRock.height
+	//    ,leftDiff = overlappingRock.x - draggedRock.x+draggedRock.width
+	//    ,downDiff = draggedRock.y - overlappingRock.y+overlappingRock.height
+	//    ,rightDiff = draggedRock.x - overlappingRock.x+overlappingRock.width;
+	var upDiff = draggedRock.y+draggedRock.height - overlappingRock.y
+	   ,leftDiff = draggedRock.x+draggedRock.width - overlappingRock.x
+	   ,downDiff = overlappingRock.y+overlappingRock.height - draggedRock.y
+	   ,rightDiff = overlappingRock.x+overlappingRock.width - draggedRock.x;
+	if (direction) {
+		stats.direction = direction;
+		switch (direction) {
+			case 'up': stats.distance = upDiff; break;
+			case 'left': stats.distance = leftDiff; break;
+			case 'down': stats.distance = downDiff; break;
+			case 'right': stats.distance = rightDiff; break;
+		}
+	} else {
+		var smallestDiff = Math.min(upDiff, Math.min(leftDiff, Math.min(downDiff, rightDiff)));
+		stats.distance = smallestDiff
+		switch (smallestDiff) {
+			case upDiff: stats.direction = 'up'; break;
+			case leftDiff: stats.direction = 'left'; break;
+			case downDiff: stats.direction = 'down'; break;
+			case rightDiff: stats.direction = 'right'; break;
+		}
+	}
+	return stats;
 }
 
 var resizeBox = {};
@@ -432,14 +539,69 @@ function collectPhaseOneData(action) {
 	dataRow.stimulusNum = currentExample;
 	dataRow.stimulus = stimuli.data[currentExample];
 	dataRow.userRocks = getRocksWithinUserZoneWindow();
+	dataRow.controlRocks = getRocksWithinControlZoneWindow();
 	dataRow.userAction = action;
+	if (action==='drag')
+		dataRow.draggedObject = draggedRock;
 	dataRow.categorySatisfied = correct;
 
 	console.log(dataRow);
 	game.addRow(dataRow);
 }
 
+function getURLParameter(name) {
+	var val = RegExp(name + '=' + '(.+?)(&|$)').exec(window.location.search);
+	return val ? decodeURIComponent(val[1]) : null;
+}
+
+function getControlRockZoneDimensions() {
+	return {width: getURLParameter('width1'), height: getURLParameter('height1')};
+}
+
+function getUserRockZoneDimensions(controlRockZoneDimensions) {
+	var width = getURLParameter('width2')
+	   ,height = getURLParameter('height2');
+	if (!width) width = controlRockZoneDimensions.width;
+	if (!height) height = controlRockZoneDimensions.height;
+	return {width: width, height: height};
+}
+
+function getMaximumNumberOfObjects() {
+	return parseInt(getURLParameter('maxObjects'));
+}
+
+function calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensions) {
+	if (controlRockZoneDimensions.height) {
+		controlRockZoneHeight = parseInt(controlRockZoneDimensions.height);
+	}
+	if (controlRockZoneDimensions.width) {
+		controlRockZoneWidth = parseInt(controlRockZoneDimensions.width);
+	}
+	if (userRockZoneDimensions.height) {
+		userRockZoneHeight = parseInt(userRockZoneDimensions.height);
+	}
+	if (userRockZoneDimensions.width) {
+		userRockZoneWidth = parseInt(userRockZoneDimensions.width);
+	}
+	// benchWidth = (controlRockZoneWidth+userRockZoneWidth)/2;
+
+	largestRockZoneHeight = (controlRockZoneHeight > userRockZoneHeight ? controlRockZoneHeight : userRockZoneHeight)
+	boardHeight = largestRockZoneHeight + rockZoneMargin*4
+	boardWidth = rockZoneMargin + controlRockZoneWidth + rockZoneMargin + userRockZoneWidth + benchWidth
+	userRockZoneX = controlRockZoneX + controlRockZoneWidth + rockZoneMargin
+	console.log(controlRockZoneX, controlRockZoneWidth, rockZoneMargin, userRockZoneX)
+	buttonWidth = boardWidth*6/10*1/4
+	refreshButtonCX = boardWidth*1/3
+	refreshButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
+	nextButtonCX = boardWidth*2/3
+	nextButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
+}
+
 function initializePhaseOne() {
+	var controlRockZoneDimensions = getControlRockZoneDimensions();
+	var userRockZoneDimensions = getUserRockZoneDimensions(controlRockZoneDimensions);
+	var maximumNumberOfObjects = getMaximumNumberOfObjects();
+	calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensions);
 	setupBoard();
 	setupControlRockZone();
 	setupUserRockZone();
@@ -450,7 +612,10 @@ function initializePhaseOne() {
 
 	collection.extendCollection(rockSetupData);
 	collection.extendCollection(stimuli.data[currentExample]);
-	collection.extendCollection(benchRockData);
+	var benchRocks = benchRockData;
+	if (maximumNumberOfObjects < benchRocks.length)
+		benchRocks = benchRocks.slice(0, maximumNumberOfObjects);
+	collection.extendCollection(benchRocks);
 	setupRocks();
 }
 

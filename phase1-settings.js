@@ -3,19 +3,34 @@ var game = new Game();
 
 var scale = 1
 
+   ,controlRockZoneHeight = 550
+   ,controlRockZoneWidth = 550
+   ,userRockZoneHeight = 550
+   ,userRockZoneWidth = 550
+   ,benchWidth = 300
+
+   ,largestRockZoneHeight = (controlRockZoneHeight > userRockZoneHeight ? controlRockZoneHeight : userRockZoneHeight)
+
+   ,rockZoneMargin = 50
+
+   ,boardHeight = largestRockZoneHeight + rockZoneMargin*4
+   ,boardWidth = rockZoneMargin + controlRockZoneWidth + rockZoneMargin + userRockZoneWidth + benchWidth
+
    // board stats
-   ,boardHeight = 750*scale
-   ,boardWidth = 1500*scale
+   // ,boardHeight = 750*scale
+   // ,boardWidth = 1500*scale
    ,boardColor = 'white'
 
    // rock zone stats
-   ,controlRockZoneX = boardHeight/15 // = 50
+   // ,controlRockZoneX = boardHeight/15 // = 50
+   ,controlRockZoneX = rockZoneMargin
    ,controlRockZoneY = controlRockZoneX
 
-   ,rockZoneHeight = boardHeight - controlRockZoneX*4
-   ,rockZoneWidth = rockZoneHeight
+   // ,rockZoneHeight = boardHeight - controlRockZoneX*4
+   // ,rockZoneWidth = rockZoneHeight
 
-   ,userRockZoneX = controlRockZoneX + rockZoneWidth + controlRockZoneX
+   // ,userRockZoneX = controlRockZoneX + rockZoneWidth + controlRockZoneX
+   ,userRockZoneX = controlRockZoneX + controlRockZoneWidth + rockZoneMargin
    ,userRockZoneY = controlRockZoneY
 
    ,rockZoneColor = 'linen'
@@ -31,11 +46,13 @@ var scale = 1
    ,buttonColor = 'rgb(150,150,150)'
    ,buttonPushedColor = 'rgb(25,25,50)'
 
-   ,refreshButtonCX = controlRockZoneX+rockZoneWidth/2
-   ,refreshButtonCY = controlRockZoneY+rockZoneHeight+(boardHeight-controlRockZoneY-rockZoneHeight)/2
+   // ,refreshButtonCX = controlRockZoneX+controlRockZoneWidth/2
+   ,refreshButtonCX = boardWidth*1/3
+   ,refreshButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
 
-   ,nextButtonCX = userRockZoneX+rockZoneWidth/2//boardWidth*1/2
-   ,nextButtonCY = controlRockZoneY+rockZoneHeight+(boardHeight-controlRockZoneY-rockZoneHeight)/2
+   // ,nextButtonCX = userRockZoneX+userRockZoneWidth/2//boardWidth*1/2
+   ,nextButtonCX = boardWidth*2/3
+   ,nextButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
 
    // rock stats
    ,rockColors = ['rgb(25,5,5)'
