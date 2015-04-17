@@ -17,7 +17,7 @@ var userWindowSatisfiesSandwichCategory = function() {
 }
 
 var getRocksWithinControlZoneWindow = function() {
-	var allRocks = collection.getRocks();
+	var allRocks = controlCollection.getRocks();
 	var rocksWithinWindow = [];
 	var windowSpace = {};
 	windowSpace.x1 = controlRockZoneX, windowSpace.y1 = controlRockZoneY
@@ -207,8 +207,6 @@ function findRocksInRegion(A, B, A_box, B_box) {
 					} else {
 						return [];
 					}
-				} else if (distanceBetweenRocks(A, C)<=largeRockHeight || distanceBetweenRocks(B, C)<=largeRockHeight) {
-					return [];
 				}
 			}
 		}
