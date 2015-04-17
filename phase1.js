@@ -58,6 +58,7 @@ function setupUserRockZone() {
 	   .attr({width: userRockZoneWidth, height: userRockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
 	   .attr({x: userRockZoneX, y: userRockZoneY})
 	   .classed('noselect', true);
+	console.log(userRockZoneX);
 }
 
 function setupRefreshButton() {
@@ -167,8 +168,7 @@ function createRockGroupSelection(rock) {
 	return rockGroup;
 }
 
-function createRockSelection(rock, group) {
-	console.log(rock.borderColor);
+function createRockSelection(rock, group, disallowDrag) {
 	var r = group.append('rect')
 						.attr('id', rock.getID())
 						.attr('x', function(d) { return d.x })
@@ -177,8 +177,8 @@ function createRockSelection(rock, group) {
 						.attr('height', function(d) { return d.h })
 						.style('fill', function(d) { return rockColors[d.c] })
 		    		.attr({'stroke-width': 3, 'stroke': (rock.borderColor ? rock.borderColor : 'black'), 'opacity': 1})
-		    		.style('fill-opacity', 0.75)
-		    		.call(rockDrag);
+		    		.style('fill-opacity', 0.75);
+	if (!disallowDrag) r.call(rockDrag);
   return r;
 }
 
@@ -207,6 +207,18 @@ function setupRocks() {
 		rock.setRockSelection(rockSelection);
 		rock.setHandleSelection(handleSelection);
 		groupSelection.on('dblclick', dblclickRock)
+	}
+	displayUserFeedback();
+}
+
+function setupStimuli() {
+	var rocks = controlCollection.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		var rock = rocks[i];
+		var groupSelection = createRockGroupSelection(rock);
+		var rockSelection = createRockSelection(rock, groupSelection, true);
+		rock.setGroupSelection(groupSelection);
+		rock.setRockSelection(rockSelection);
 	}
 	displayUserFeedback();
 }
@@ -270,7 +282,6 @@ function slideToNonOverlappingPosition(draggedRock, data) {
 function overlappingAnotherRock(draggedRock) {
 	for (var i=0; i<collection.numberOfRocks(); i++) {
 		var rock = collection.rocks[i];
-		console.log(rectOverlap(draggedRock, rock));
 		if (draggedRock.ID!==rock.ID && rectOverlap(draggedRock, rock)) return rock;
 	}
 	return false;
@@ -322,7 +333,6 @@ function slideRockInDirection(draggedRock, data, overlappingRock, slideDirection
 	draggedRock.setXY(data.x, data.y);
 
 	var overlappingRock2 = overlappingAnotherRock(draggedRock);
-			// console.log('new overlapping rock: ', overlappingRock2)
 	if (overlappingRock2) {
 		setTimeout(function() {
 			slideRockInDirection(draggedRock, data, overlappingRock2, slideStat.direction);
@@ -545,7 +555,6 @@ function collectPhaseOneData(action) {
 		dataRow.draggedObject = draggedRock;
 	dataRow.categorySatisfied = correct;
 
-	console.log(dataRow);
 	game.addRow(dataRow);
 }
 
@@ -588,8 +597,7 @@ function calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensi
 	largestRockZoneHeight = (controlRockZoneHeight > userRockZoneHeight ? controlRockZoneHeight : userRockZoneHeight)
 	boardHeight = largestRockZoneHeight + rockZoneMargin*4
 	boardWidth = rockZoneMargin + controlRockZoneWidth + rockZoneMargin + userRockZoneWidth + benchWidth
-	userRockZoneX = controlRockZoneX + controlRockZoneWidth + rockZoneMargin
-	console.log(controlRockZoneX, controlRockZoneWidth, rockZoneMargin, userRockZoneX)
+	controlRockZoneX = userRockZoneX + userRockZoneWidth + rockZoneMargin
 	buttonWidth = boardWidth*6/10*1/4
 	refreshButtonCX = boardWidth*1/3
 	refreshButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
@@ -603,20 +611,21 @@ function initializePhaseOne() {
 	var maximumNumberOfObjects = getMaximumNumberOfObjects();
 	calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensions);
 	setupBoard();
-	setupControlRockZone();
 	setupUserRockZone();
+	setupControlRockZone();
 	setupRefreshButton();
 	setupNextButton();
 	setupNextButtonListener();
 	setupRefreshButtonListener();
 
 	collection.extendCollection(rockSetupData);
-	collection.extendCollection(stimuli.data[currentExample]);
+	controlCollection.extendCollection(stimuli.data[currentExample]);
 	var benchRocks = benchRockData;
 	if (maximumNumberOfObjects < benchRocks.length)
 		benchRocks = benchRocks.slice(0, maximumNumberOfObjects);
 	collection.extendCollection(benchRocks);
 	setupRocks();
+	setupStimuli();
 }
 
 function teardownPhaseOne() {
