@@ -557,6 +557,7 @@ function collectPhaseOneData(action) {
 		dataRow.draggedObject = draggedRock;
 	dataRow.categorySatisfied = correct;
 
+	console.log(dataRow);
 	game.addRow(dataRow);
 }
 

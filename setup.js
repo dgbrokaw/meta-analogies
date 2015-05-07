@@ -7,17 +7,36 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                     ,{type: 'small', x: 50, y: 475, color: 2}
                     ,{type: 'medium', x: 100, y: 475}]
 
-   ,rockSetupData = [{type: 'small', color: 2, x: 78, y: 188, border: true}
-    	              ,{type: 'medium', color: 1, x: 200, y: 227}
-    	              ,{type: 'large', color: 0, x: 65, y: 303, border: true}]
+   ,rockSetupData = [{type: 'medium', color: 2, x: 150, y: 150, border: true}
+    	              ,{type: 'medium', color: 1, x: 150, y: 227}
+    	              ,{type: 'medium', color: 2, x: 150, y: 303, border: true}]
 
-   ,stimuli = {category: "support"
-              ,data: [[{type: 'small', x: 58, y: 276, border: true}
-                      ,{type: 'medium', x: 150, y: 275, border: true}
-                      ,{type: 'large', x: 58, y: 225}]
-                     ,[{type: 'medium', x: 419-350 , y: 227}
-                      ,{type: 'large', x: 358-350, y: 277}
-                      ,{type: 'large', x: 429-350, y: 277}]]}
+   ,stimuli = {category: "sandwich"
+              ,data: [[{type: 'large', color: 0, border: true, x: 250, y: 150}
+                      ,{type: 'small', color: 0, x: 280, y: 260}
+                      ,{type: 'large', color: 0, border: true, x: 250, y: 310}
+                      ,{type: 'medium', color: 1, x: 20, y: 300}
+                      ,{type: 'small', color: 0, x: 350, y: 265}
+                      ,{type: 'large', color: 2, border: true, x: 400, y: 400}]
+
+                     ,[{type: 'medium', color: 2, border: true, x: 100, y: 200}
+                      ,{type: 'medium', color: 1, x: 190, y: 210}
+                      ,{type: 'small', color: 2, x: 280, y: 220}
+                      ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
+                      ,{type: 'medium', color: 2, x: 10, y: 198}
+                      ,{type: 'medium', color: 2, border: true, x: 410, y: 295}
+                      ,{type: 'small', color: 1, x: 20, y: 10}]
+
+                     ,[{type: 'small', color: 0, border: true, x: 150, y: 50}
+                      ,{type: 'medium', color: 0, x: 120, y: 120}
+                      ,{type: 'small', color: 1, x: 140, y: 200}
+                      ,{type: 'large', color: 0, x: 110, y: 244}
+                      ,{type: 'small', color: 0, border: true, x: 150, y: 350}
+                      ,{type: 'small', color: 0, border: true, x: 300, y: 55}
+                      ,{type: 'medium', color: 1, x: 280, y: 125}
+                      ,{type: 'small', color: 1, x: 290, y: 210}
+                      ,{type: 'large', color: 0, x: 270, y: 260}
+                      ,{type: 'small', color: 0, border: true, x: 300, y: 355}]]}
 
   ,x1 = testRockZoneX
   ,y1 = testRockZoneY
@@ -147,6 +166,6 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                                 ,{type: 'medium', color: 2, x: 250, y: 340}]
                         ,answer: 'no'}];
 
-rockSetupData.forEach(function(d) {d.x += userRockZoneX});
-stimuli.data.forEach(function(d) {d.forEach(function(r) {r.x += controlRockZoneX})});
+rockSetupData.forEach(function(d) {d.x += userRockZoneX; d.y += userRockZoneY});
+stimuli.data.forEach(function(d) {d.forEach(function(r) {r.x += controlRockZoneX; r.y += controlRockZoneY})});
 testRockSetupData.forEach(function(d) {d.rocks.forEach(function(r) {r.x += x1; r.y += y1})});
