@@ -223,6 +223,7 @@ function findRocksInRegion(A, B, A_box, B_box) {
 // }
 
 function containsSandwich(A, rocks, B) {
+	return true;
 	var vertical_arrangement = (B.y-(A.y+A.height))>(B.x-(A.x+A.width));
 	var orderedRocks = [];
 	while (rocks.length>0) {

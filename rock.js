@@ -95,7 +95,7 @@ RockCollection.prototype.extendCollection = function(data) {
 		var rock = new Rock(datum.type);
 		rock.setXY(datum.x, datum.y);
 		rock.updateSize();
-		rock.borderColor = datum.border;
+		rock.borderColor = datum.border ? 'seagreen' : false;
 		this.rocks.push(rock);
 		if (datum.color) rock.color = datum.color;
 	}
