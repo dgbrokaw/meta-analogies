@@ -87,7 +87,7 @@ function createPhaseTwoRockSelection(rock, group) {
 						.attr('width', function(d) { return d.w })
 						.attr('height', function(d) { return d.h })
 						.style('fill', function(d) { return rockColors[d.c] })
-		    		.attr({'stroke-width': 3, 'stroke': 'black', 'opacity': 1})
+						.attr({'stroke-width': 3, 'stroke': (rock.borderColor ? rock.borderColor : 'black'), 'opacity': 1})
 		    		.style('fill-opacity', 0.75);
   return r;
 }
@@ -129,7 +129,27 @@ function collectPhaseTwoData(response) {
 	game.addRow(dataRow);
 }
 
+function getTestRockZoneDimensions() {
+	return {width: getURLParameter('width'), height: getURLParameter('height')};
+}
+
+function calculateTestBoardDimensions(rockZoneDimensions) {
+	if (rockZoneDimensions.width) {
+		rockZoneWidth = parseInt(rockZoneDimensions.width);
+	}
+	if (rockZoneDimensions.height) {
+		rockZoneHeight = parseInt(rockZoneDimensions.height);
+	}
+
+	boardWidth = 1500//rockZoneWidth + rockZoneMargin*2;
+	boardHeight = rockZoneHeight + rockZoneMargin*4;
+
+	testRockZoneX = (boardWidth-rockZoneWidth)/2
+}
+
 function initializePhaseTwo() {
+	var rockZoneDimensions = getTestRockZoneDimensions();
+	calculateTestBoardDimensions(rockZoneDimensions);
 	setupPhaseTwoBoard();
 	setupTestRockZone();
 	setupNoButton();

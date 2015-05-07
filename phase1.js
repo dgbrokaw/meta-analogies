@@ -109,11 +109,13 @@ function clickNext() {
 	if (correct && currentExample<stimuli.data.length-1) {
 		collectPhaseOneData('next');
 		collection.clearCollection();
+		controlCollection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
-		collection.extendCollection(stimuli.data[currentExample]);
 		collection.extendCollection(benchRockData);
+		controlCollection.extendCollection(stimuli.data[currentExample]);
 		setupRocks();
+		setupStimuli();
 		displayUserFeedback();
 		collectPhaseOneData('start');
 		// setIncorrect();
