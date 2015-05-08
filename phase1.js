@@ -79,7 +79,7 @@ function clickRefresh() {
 	collectPhaseOneData('refresh')
 	collection.clearCollection();
 	collection.extendCollection(rockSetupData);
-	collection.extendCollection(stimuli.data[currentExample]);
+	collection.extendCollection(trainStimuli[currentExample].rocks);
 	collection.extendCollection(benchRockData);
 	setupRocks();
 	displayUserFeedback();
@@ -106,14 +106,14 @@ function setupNextButton() {
 }
 
 function clickNext() {
-	if (correct && currentExample<stimuli.data.length-1) {
+	if (correct && currentExample<trainStimuli.length-1) {
 		collectPhaseOneData('next');
 		collection.clearCollection();
 		controlCollection.clearCollection();
 		currentExample++;
 		collection.extendCollection(rockSetupData);
 		collection.extendCollection(benchRockData);
-		controlCollection.extendCollection(stimuli.data[currentExample]);
+		controlCollection.extendCollection(trainStimuli[currentExample].rocks);
 		setupRocks();
 		setupStimuli();
 		displayUserFeedback();
@@ -123,7 +123,8 @@ function clickNext() {
 		collectPhaseOneData('next');
 		collection.clearCollection();
 		teardownPhaseOne();
-		initializePhaseTwo();
+		displayTestingInstructions();
+		// initializePhaseTwo();
 	}
 }
 
@@ -543,22 +544,46 @@ function checkUserWindow() {
 }
 
 function collectPhaseOneData(action) {
+	if (action==='color') {
+		// to change color, you dblclick, which has the side-effect of two drag events.  discard those extra two rows of data.
+		game.deleteLastRow();
+		game.deleteLastRow();
+	}
 	var d = new Date();
 	var dataRow = new Row();
+
 	dataRow.subjectID = game.getSubjectID();
 	dataRow.date = d.toDateString();
 	dataRow.t = d.toTimeString();
-	dataRow.stimulusNum = currentExample;
-	dataRow.stimulus = stimuli.data[currentExample];
-	dataRow.userRocks = getRocksWithinUserZoneWindow();
-	dataRow.controlRocks = getRocksWithinControlZoneWindow();
+	dataRow.phase = 'train';
+	dataRow.stimulusNum = trainStimuli[currentExample].stimulusNum;
+	dataRow.userRocks = codifyUserRockData(getRocksWithinUserZoneWindow());
 	dataRow.userAction = action;
-	if (action==='drag')
-		dataRow.draggedObject = draggedRock;
-	dataRow.categorySatisfied = correct;
+	dataRow.userCorrect = correct;
 
 	console.log(dataRow);
 	game.addRow(dataRow);
+}
+
+function saveData(data) {
+	// using the FileSaver.js to save the game to file
+	// (should contain all user and test data)
+
+	var csv = d3.csv.format(data);
+	var blob = new Blob([csv], {type: 'text/csv'});
+	var fileName = ''
+		+	(new Date()).toDateString().replace(/ /g, "-")
+		+ 'subject' + game.getSubjectID()
+		+ '.csv';
+	saveAs(blob, fileName);
+}
+
+function codifyUserRockData(rocks) {
+	var code = '';
+	rocks.forEach(function(rock) {
+		code += 'size:' + rock.type + ',' + (rock.borderColor ? 'bordered,' : '') + 'color:' + rock.color + ',location:(' + rock.x + ',' + rock.y + ');'
+	})
+	return code;
 }
 
 function getURLParameter(name) {
@@ -621,14 +646,24 @@ function initializePhaseOne() {
 	setupNextButtonListener();
 	setupRefreshButtonListener();
 
+	trainStimuli = shuffle(trainStimuli);
+
 	collection.extendCollection(rockSetupData);
-	controlCollection.extendCollection(stimuli.data[currentExample]);
+	// controlCollection.extendCollection(stimuli.data[currentExample]);
+	controlCollection.extendCollection(trainStimuli[currentExample].rocks);
+
 	var benchRocks = benchRockData;
 	if (maximumNumberOfObjects < benchRocks.length)
 		benchRocks = benchRocks.slice(0, maximumNumberOfObjects);
 	collection.extendCollection(benchRocks);
 	setupRocks();
 	setupStimuli();
+}
+
+function shuffle(o) {
+  o = o.slice();
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
 }
 
 function teardownPhaseOne() {

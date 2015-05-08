@@ -2,9 +2,13 @@
 
 <title>Meta-analogies (rocks)</title>
 <script src='d3.min.js'></script>
+<script src='FileSaver.js'></script>
 <script src='game.js'></script>
 <script src='data.js'></script>
 <script src='rock.js'></script>
+<script src='training-instructions.js'></script>
+<script src='testing-instructions.js'></script>
+<script src='post-experiment-instructions.js'></script>
 <script src='phase1-settings.js'></script>
 <script src='phase2-settings.js'></script>
 <script src='phase1.js'></script>
@@ -17,17 +21,23 @@
 .noselect {
 	-webkit-user-select:none;
 }
+
+#instructions {
+	margin: 100px 30% 0 30%;
+	font-size: 14pt;
+}
 </style>
 
 <body>
 </body>
 
 <script>
-game.setSubjectID(1);
+game.createAndSetSubjectID();
 
 window.onload = function() {
-	initializePhaseOne();
-	collectPhaseOneData('start');
+	displayTrainingInstructions();
+	// initializePhaseOne();
+	// collectPhaseOneData('start');
 	// initializePhaseTwo();
 }
 </script>

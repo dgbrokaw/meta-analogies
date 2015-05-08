@@ -107,23 +107,28 @@ function responseGiven(response) {
 	collectPhaseTwoData(response);
 	currentTest++;
 	collection.clearCollection();
-	if (currentTest<testRockSetupData.length) {
-		collection.extendCollection(testRockSetupData[currentTest].rocks);
+	if (currentTest<testStimuli.length) {
+		collection.extendCollection(testStimuli[currentTest].rocks);
 		setupPhaseTwoRocks();
 	} else {
+		saveData(game.record);
 		teardownPhaseTwo();
+		displayPostExperimentText();
 	}
 }
 
 function collectPhaseTwoData(response) {
 	var d = new Date();
 	var dataRow = new Row();
+
 	dataRow.subjectID = game.getSubjectID();
 	dataRow.date = d.toDateString();
 	dataRow.t = d.toTimeString();
-	dataRow.stimulusNum = currentTest;
-	dataRow.stimulus = testRockSetupData[currentTest];
+	dataRow.phase = 'test';
+	dataRow.stimulusNum = testStimuli[currentTest].stimulusNum;
+	dataRow.userRocks = null;
 	dataRow.userAction = response;
+	dataRow.userCorrect = response===testStimuli[currentTest].answer;
 
 	console.log(dataRow);
 	game.addRow(dataRow);
@@ -157,7 +162,9 @@ function initializePhaseTwo() {
 	setupYesButton();
 	setupYesButtonListener();
 
-	collection.extendCollection(testRockSetupData[currentTest].rocks);
+	testStimuli = shuffle(testStimuli);
+
+	collection.extendCollection(testStimuli[currentTest].rocks);
 	setupPhaseTwoRocks();
 }
 
