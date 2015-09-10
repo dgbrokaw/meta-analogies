@@ -17,6 +17,10 @@ Game.prototype.getSubjectID = function() {
 	return this.subjectID;
 }
 
+Game.prototype.setCondition = function(condition) {
+  this.condition = condition;
+}
+
 Game.prototype.addRow = function(data) {
 	this.record.push(data);
 }
