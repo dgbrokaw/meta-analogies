@@ -29,6 +29,19 @@ Game.prototype.deleteLastRow = function() {
 	this.record.pop();
 }
 
+var Row = function() {
+  this.subjectID;
+
+  this.date;
+  this.t;
+
+  this.stimulusNum;
+  this.stimulus;
+  this.userRocks;
+  this.userAction;
+  this.categorySatisfied;
+}
+
 function uid() {
   var b32 = 0x100000000, f = 0xf, b = []
   str = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
