@@ -15,8 +15,8 @@ var scale = 1
    ,rockZoneMargin = 50
 
    ,boardHeight = largestRockZoneHeight + rockZoneMargin*4
-   // ,boardWidth = rockZoneMargin + controlRockZoneWidth + rockZoneMargin + userRockZoneWidth + benchWidth
-   ,boardWidth = benchWidth + userRockZoneWidth + rockZoneMargin + controlRockZoneWidth + rockZoneMargin
+   ,boardWidth = benchWidth + userRockZoneWidth + benchWidth
+   // ,boardWidth = benchWidth + userRockZoneWidth + rockZoneMargin + controlRockZoneWidth + rockZoneMargin
 
    // board stats
    ,boardColor = 'white'
