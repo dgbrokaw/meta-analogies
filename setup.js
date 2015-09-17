@@ -46,6 +46,55 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                             ,{type: 'large', color: 0, x: 270, y: 260}
                             ,{type: 'small', color: 0, border: true, x: 300, y: 355}]}]
 
+   ,stuff = {
+      phase: 'train-interactive'
+
+    , category: 'sandwich'
+
+    , benchRocks: [{type: 'small', x: 50, y: 100, color: 2}
+                  ,{type: 'medium', x: 125, y: 100, color: 1}
+                  ,{type: 'large', x: 50, y: 180, border: true}
+                  ,{type: 'medium', x: 50, y: 275}
+                  ,{type: 'small', x: 150, y: 255, color: 1}
+                  ,{type: 'large', x: 50, y: 370, color: 1}
+                  ,{type: 'small', x: 50, y: 475, color: 2}
+                  ,{type: 'medium', x: 100, y: 475}]
+    , stimuli: [{phase: 'train'
+                ,stimulusNum: 1
+                ,category: 'sandwich'
+                ,rocks: [{type: 'large', color: 0, border: true, x: 250, y: 150}
+                        ,{type: 'small', color: 0, x: 280, y: 260}
+                        ,{type: 'large', color: 0, border: true, x: 250, y: 310}
+                        ,{type: 'medium', color: 1, x: 20, y: 300}
+                        ,{type: 'small', color: 0, x: 350, y: 265}
+                        ,{type: 'large', color: 2, border: true, x: 400, y: 400}]}
+
+               ,{phase: 'train'
+                ,stimulusNum: 2
+                ,category: 'sandwich'
+                ,rocks: [{type: 'medium', color: 2, border: true, x: 100, y: 200}
+                        ,{type: 'medium', color: 1, x: 190, y: 210}
+                        ,{type: 'small', color: 2, x: 280, y: 220}
+                        ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
+                        ,{type: 'medium', color: 2, x: 10, y: 198}
+                        ,{type: 'medium', color: 2, border: true, x: 410, y: 295}
+                        ,{type: 'small', color: 1, x: 20, y: 10}]}
+
+               ,{phase: 'train'
+                ,stimulusNum: 3
+                ,category: 'sandwich'
+                ,rocks: [{type: 'small', color: 0, border: true, x: 150, y: 50}
+                        ,{type: 'medium', color: 0, x: 120, y: 120}
+                        ,{type: 'small', color: 1, x: 140, y: 200}
+                        ,{type: 'large', color: 0, x: 110, y: 244}
+                        ,{type: 'small', color: 0, border: true, x: 150, y: 350}
+                        ,{type: 'small', color: 0, border: true, x: 300, y: 55}
+                        ,{type: 'medium', color: 1, x: 280, y: 125}
+                        ,{type: 'small', color: 1, x: 290, y: 210}
+                        ,{type: 'large', color: 0, x: 270, y: 260}
+                        ,{type: 'small', color: 0, border: true, x: 300, y: 355}]}]
+    }
+
    // ,stimuli = {category: "sandwich"
    //            ,data: [[{type: 'large', color: 0, border: true, x: 250, y: 150}
    //                    ,{type: 'small', color: 0, x: 280, y: 260}
@@ -73,8 +122,8 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
    //                    ,{type: 'large', color: 0, x: 270, y: 260}
    //                    ,{type: 'small', color: 0, border: true, x: 300, y: 355}]]}
 
-  ,x1 = testRockZoneX
-  ,y1 = testRockZoneY
+  // ,x1 = testRockZoneX
+  // ,y1 = testRockZoneY
   ,testStimuli = [{phase: 'test'
                   ,stimulusNum: 1
                   ,category: 'sandwich'
@@ -241,6 +290,6 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                           ,{type: 'medium', color: 2, x: 250, y: 340}]
                   ,answer: 'no'}];
 
-rockSetupData.forEach(function(d) {d.x += userRockZoneX; d.y += userRockZoneY});
-trainStimuli.forEach(function(d) {d.rocks.forEach(function(r) {r.x += controlRockZoneX; r.y += controlRockZoneY})});
-testStimuli.forEach(function(d) {d.rocks.forEach(function(r) {r.x += x1; r.y += y1})});
+// rockSetupData.forEach(function(d) {d.x += userRockZoneX; d.y += userRockZoneY});
+// trainStimuli.forEach(function(d) {d.rocks.forEach(function(r) {r.x += controlRockZoneX; r.y += controlRockZoneY})});
+// testStimuli.forEach(function(d) {d.rocks.forEach(function(r) {r.x += x1; r.y += y1})});

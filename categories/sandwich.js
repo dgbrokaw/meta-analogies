@@ -1,46 +1,27 @@
-var rocks;
+var SandwichCategory = function(settings) {
+	this.settings = settings;
+}
 
-var controlWindowSatisfiesSandwichCategory = function() {
-	rocks = getRocksWithinControlZoneWindow();
-	for (var i=0; i<rocks.length; i++) {
-		if (rockSatisfiesSandwichCategory(i)) return true;
+categories['sandwich'] = SandwichCategory;
+
+SandwichCategory.prototype.windowSatisfiesCategory = function(rockZoneID, collection) {
+	this.rocks = this.getRocksWithinWindow(rockZoneID, collection);
+	for (var i=0; i<this.rocks.length; i++) {
+		if (this.rockSatisfiesSandwichCategory(i)) return true;
 	}
 	return false;
 }
 
-var userWindowSatisfiesSandwichCategory = function() {
-	rocks = getRocksWithinUserZoneWindow();
-	for (var i=0; i<rocks.length; i++) {
-		if (rockSatisfiesSandwichCategory(i)) return true;
-	}
-	return false;
-}
-
-var getRocksWithinControlZoneWindow = function() {
-	var allRocks = controlCollection.getRocks();
-	var rocksWithinWindow = [];
-	var windowSpace = {};
-	windowSpace.x1 = controlRockZoneX, windowSpace.y1 = controlRockZoneY
- ,windowSpace.x2 = controlRockZoneX+controlRockZoneWidth, windowSpace.y2 = controlRockZoneY+controlRockZoneHeight;
-	for (var i=0; i<allRocks.length; i++) {
-		var rock = allRocks[i], rockSpace = {};
-		rockSpace.x1 = rock.x, rockSpace.y1 = rock.y, rockSpace.x2 = rock.x+rock.width, rockSpace.y2 = rock.y+rock.height;
-		if (rockSpaceIsWithinWindowSpace(rockSpace, windowSpace)) {
-			rocksWithinWindow.push(rock);
-		}
-	}
-	return rocksWithinWindow;
-}
-
-var getRocksWithinUserZoneWindow = function() {
+SandwichCategory.prototype.getRocksWithinWindow = function(rockZoneID, collection) {
 	var allRocks = collection.getRocks();
 	var rocksWithinWindow = [];
 	var windowSpace = {};
-	windowSpace.x1 = userRockZoneX, windowSpace.y1 = userRockZoneY
- ,windowSpace.x2 = userRockZoneX+userRockZoneWidth, windowSpace.y2 = userRockZoneY+userRockZoneHeight;
+	var rockZone = d3.select(rockZoneID);
+	windowSpace.x1 = rockZone.attr('x'), windowSpace.y1 = rockZone.attr('y')
+ ,windowSpace.x2 = windowSpace.x1+rockZone.attr('width'), windowSpace.y2 = windowSpace.y1+rockZone.attr('height');
 	for (var i=0; i<allRocks.length; i++) {
 		var rock = allRocks[i], rockSpace = {};
-		rockSpace.x1 = rock.x, rockSpace.y1 = rock.y, rockSpace.x2 = rock.x+rock.width, rockSpace.y2 = rock.y+rock.height;
+		rockSpace.x1 = rock.x, rockSpace.y1 = rock.y, rockSpace.x2 = rock.x+rock.dimension, rockSpace.y2 = rock.y+rock.dimension;
 		if (rockSpaceIsWithinWindowSpace(rockSpace, windowSpace)) {
 			rocksWithinWindow.push(rock);
 		}
@@ -55,41 +36,18 @@ function rockSpaceIsWithinWindowSpace(rockSpace, windowSpace) {
 			 && rockSpace.y2<windowSpace.y2);
 }
 
-// I go by rocks, and see if that rock (plus other rocks) satisfies the category.
-// But instead, I should find 'rock chains' and see if any of them satisfy the category.
-// The rock chain has to be an isolated chain and satisfy the specifications.
-
-// var rockSatisfiesSandwichCategory = function(rockIDX) {
-// 	var satisfies = false;
-// 	var A = rocks[rockIDX]
-// 	   ,A_box = getCornersOf(A);
-// 	for (var i=0; i<rocks.length; i++) {
-// 		if (i!==rockIDX) {
-// 			var B = rocks[i]
-// 			   ,B_box = getCornersOf(B);
-// 			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box) && notOnExtremeDiagonal(A, B)) {
-// 				var rocksInBetween = findRocksBetween(A, B, A_box, B_box);
-// 				if (rocksInBetween.length>0 && wellSpaced(A, rocksInBetween, B)) {
-// 					satisfies = true;
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return satisfies;
-// }
-
-var rockSatisfiesSandwichCategory = function(rockIDX) {
+SandwichCategory.prototype.rockSatisfiesSandwichCategory = function(rockIDX) {
 	var satisfies = false;
-	var A = rocks[rockIDX]
+	var A = this.rocks[rockIDX]
 	   ,A_box = getCornersOf(A);
-	for (var i=0; i<rocks.length; i++) {
+	for (var i=0; i<this.rocks.length; i++) {
 		if (i!==rockIDX) {
-			var B = rocks[i]
+			var B = this.rocks[i]
 			   ,B_box = getCornersOf(B);
-			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box) && notOnExtremeDiagonal(A, B) && A.borderColor && B.borderColor && A.borderColor===B.borderColor) {
-				var rocksInRegion = findRocksInRegion(A, B, A_box, B_box);
+			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box, this.settings.smallRockDimension) && notOnExtremeDiagonal(A, B) && A.borderColor && B.borderColor && A.borderColor===B.borderColor) {
+				var rocksInRegion = this.findRocksInRegion(A, B, A_box, B_box);
 				if (rocksInRegion.length>0)
-					satisfies = containsSandwich(A, rocksInRegion, B);
+					satisfies = this.containsSandwich(A, rocksInRegion, B);
 			}
 		}
 	}
@@ -100,11 +58,11 @@ function areIdentical(A, B) {
 	return A.type===B.type && A.color===B.color;
 }
 
-function enoughSpaceBetween(A, B) {
+function enoughSpaceBetween(A, B, dist) {
 	var vertically_separated = (A.bottomLeft.y < B.topLeft.y);
 	var horizontally_separated = (A.topRight.x < B.topLeft.x);
-	if (vertically_separated && A.bottomLeft.y - B.topLeft.y < -smallRockHeight) return true;
-	if (horizontally_separated && B.topLeft.x - A.topRight.x > smallRockWidth) return true;
+	if (vertically_separated && A.bottomLeft.y - B.topLeft.y < -dist) return true;
+	if (horizontally_separated && B.topLeft.x - A.topRight.x > dist) return true;
 	return false;
 }
 
@@ -143,12 +101,12 @@ function getAngleToXUnitVector(v) {
 // Returns a list of rocks between the rocks A and B if all of them share a property with rock A.
 // If any of them does not share a property with A, then an empty list is returned.
 // If the shortest distance from one "bookend" to the first between-rock is greater than the size of a large rock, the empty list is return
-function findRocksBetween(A, B, A_box, B_box) {
+SandwichCategory.prototype.findRocksBetween = function(A, B, A_box, B_box) {
 	var rs = [];
 	var closestDistanceToA = null;
 	var closestDistanceToB = null;
-	for (var i=0; i<rocks.length; i++) {
-		var C = rocks[i];
+	for (var i=0; i<this.rocks.length; i++) {
+		var C = this.rocks[i];
 		if (C.ID!=A.ID && C.ID!=B.ID) {
 			if (!rectOverlap(A, C) && !rectOverlap(B, C) && CIsBetweenAAndB(C, A_box, B_box)) {
 				if (CSharesAPropertyWithA(C, A)) {
@@ -167,38 +125,10 @@ function findRocksBetween(A, B, A_box, B_box) {
 	return rs;
 }
 
-// function wellSpaced(b1, rocks, b2) {
-// 	var allRocks = [b1].concat(rocks).concat([b2]);
-// 	for (var i=0; i<rocks.length; i++) {
-// 		if (!nearTwoOtherRocks(rocks[i], allRocks)) return false;
-// 	}
-// 	return true;
-// }
-
-// function nearTwoOtherRocks(rock, rocks) {
-// 	var closeRock1
-// 	   ,closeRock2;
-// 	for (var i=0; i<rocks.length; i++) {
-// 		var r = rocks[i]
-// 		   ,d = distanceBetweenRocks(rock, r);
-// 		if (r.ID!=rock.ID) {
-// 			if (!closeRock1 && !closeRock2) closeRock1 = {rock: r, dist: d};
-// 			else if (closeRock1 && !closeRock2 && r.ID!=closeRock1.rock.ID) closeRock2 = {rock: r, dist: d};
-// 			else if (closeRock1 && closeRock2 && r.ID!=closeRock1.rock.ID && r.ID!=closeRock2.rock.ID) {
-// 				if (closeRock1.dist<d && d<closeRock2.dist) closeRock2 = {rock: r, dist: d};
-// 				else if (closeRock2.dist<d && d<closeRock1.dist) closeRock1 = {rock: r, dist: d};
-// 				else if (d<closeRock1.dist && d<closeRock2.dist && closeRock1.dist<closeRock2.dist) closeRock2 = {rock: r, dist: d};
-// 				else if (d<closeRock1.dist && d<closeRock2.dist && closeRock2.dist<closeRock1.dist) closeRock1 = {rock: r, dist: d};
-// 			}
-// 		}
-// 	}
-// 	return closeRock1 && closeRock2 && closeRock1.dist<=largeRockHeight && closeRock2.dist<=largeRockHeight;
-// }
-
-function findRocksInRegion(A, B, A_box, B_box) {
+SandwichCategory.prototype.findRocksInRegion = function(A, B, A_box, B_box) {
 	var rocksInRegion = [];
-	for (var i=0; i<rocks.length; i++) {
-		var C = rocks[i];
+	for (var i=0; i<this.rocks.length; i++) {
+		var C = this.rocks[i];
 		if (C.ID!=A.ID && C.ID!=B.ID) {
 			if (!rectOverlap(A, C) && !rectOverlap(B, C) && CIsInRegionOfAAndB(C, A_box, B_box)) {
 				if (CIsBetweenAAndB(C, A_box, B_box)) {
@@ -214,17 +144,9 @@ function findRocksInRegion(A, B, A_box, B_box) {
 	return rocksInRegion;
 }
 
-// returns true if the average empty space in the sandwich is less than or equal to the height of a large rock
-// function containsSandwich(A, rocks, B) {
-// 	var vertical_arrangement = (B.y-(A.y+A.height))>(B.x-(A.x+A.width));
-// 	var emptySpace = vertical_arrangement ? B.y-(A.y+A.height) : B.x-(A.x+A.width)
-// 	var number_of_empty_spaces = rocks.length+1;
-//   return emptySpace/number_of_empty_spaces<=largeRockHeight
-// }
-
-function containsSandwich(A, rocks, B) {
+SandwichCategory.prototype.containsSandwich = function(A, rocks, B) {
 	return true;
-	var vertical_arrangement = (B.y-(A.y+A.height))>(B.x-(A.x+A.width));
+	var vertical_arrangement = (B.y-(A.y+A.dimension))>(B.x-(A.x+A.dimension));
 	var orderedRocks = [];
 	while (rocks.length>0) {
 		var most_left;
@@ -239,21 +161,21 @@ function containsSandwich(A, rocks, B) {
 		rocks.splice(rocks.indexOf(most_left), 1);
 	}
 	for (var i=-1; i<orderedRocks.length; i++) {
-		if (i===-1 && distanceBetweenRocks(A, orderedRocks[0])>largeRockHeight) return false;
-		else if (i===orderedRocks.length-1 && distanceBetweenRocks(orderedRocks[i], B)>largeRockHeight) return false;
+		if (i===-1 && distanceBetweenRocks(A, orderedRocks[0])>this.settings.largeRockDimension) return false;
+		else if (i===orderedRocks.length-1 && distanceBetweenRocks(orderedRocks[i], B)>this.settings.largeRockDimension) return false;
 		else if (i>=0 && i<orderedRocks.length-1) {
-			if (distanceBetweenRocks(orderedRocks[i], orderedRocks[i+1])>largeRockHeight) return false;
+			if (distanceBetweenRocks(orderedRocks[i], orderedRocks[i+1])>this.settings.largeRockDimension) return false;
 		}
 	}
 	return true;
 }
 
 function distanceBetweenRocks(A, B) {
-	var ACenter = [A.x+A.width/2, A.y+A.height/2]
-	   ,BCenter = [B.x+B.width/2, B.y+B.height/2];
+	var ACenter = [A.x+A.dimension/2, A.y+A.dimension/2]
+	   ,BCenter = [B.x+B.dimension/2, B.y+B.dimension/2];
 	var t1 = Math.pow(BCenter[0]-ACenter[0], 2)
 	   ,t2 = Math.pow(BCenter[1]-ACenter[1], 2);
-	return Math.pow(t1+t2, 1/2) - A.height/2 - B.height/2;
+	return Math.pow(t1+t2, 1/2) - A.dimension/2 - B.dimension/2;
 }
 
 function CIsInRegionOfAAndB(C, A_box, B_box) {
@@ -322,24 +244,24 @@ function getSign(num) {
 
 function getCornersOf(A) {
 	var topLeft = {x: A.x, y: A.y}
-	   ,topRight = {x: A.x+A.width, y: A.y}
-	   ,bottomLeft = {x: A.x, y: A.y+A.height}
-	   ,bottomRight = {x: A.x+A.width, y: A.y+A.height};
+	   ,topRight = {x: A.x+A.dimension, y: A.y}
+	   ,bottomLeft = {x: A.x, y: A.y+A.dimension}
+	   ,bottomRight = {x: A.x+A.dimension, y: A.y+A.dimension};
 	return {topLeft: topLeft, topRight: topRight, bottomLeft: bottomLeft, bottomRight: bottomRight};
 }
 
 function getCenterOf(A) {
-	var centerX = (A.x+A.x+A.width)/2
-	   ,centerY = (A.y+A.y+A.height)/2;
+	var centerX = (A.x+A.x+A.dimension)/2
+	   ,centerY = (A.y+A.y+A.dimension)/2;
 	return {x: centerX, y: centerY};
 }
 
 function rectOverlap(A, B) {
-	var xOverlap = valueInRange(A.x, B.x, B.x + B.width) ||
-								 valueInRange(B.x, A.x, A.x + A.width);
+	var xOverlap = valueInRange(A.x, B.x, B.x + B.dimension) ||
+								 valueInRange(B.x, A.x, A.x + A.dimension);
 
-	var yOverlap = valueInRange(A.y, B.y, B.y + B.height) ||
-	               valueInRange(B.y, A.y, A.y + A.height);
+	var yOverlap = valueInRange(A.y, B.y, B.y + B.dimension) ||
+	               valueInRange(B.y, A.y, A.y + A.dimension);
 
 	return xOverlap && yOverlap;
 }
@@ -347,3 +269,87 @@ function rectOverlap(A, B) {
 var valueInRange = function(value, range1, range2) {
 	return range1 <= value && value <= range2;
 }
+
+// var controlWindowSatisfiesSandwichCategory = function() {
+// 	rocks = getRocksWithinControlZoneWindow();
+// 	for (var i=0; i<rocks.length; i++) {
+// 		if (rockSatisfiesSandwichCategory(i)) return true;
+// 	}
+// 	return false;
+// }
+
+// SandwichCategory.prototype.getRocksWithinUserZoneWindow = function(rockZoneID, collection) {
+// 	var allRocks = collection.getRocks();
+// 	var rocksWithinWindow = [];
+// 	var rockZone = d3.select(rockZoneID);
+// 	var windowSpace = {};
+// 	windowSpace.x1 = rockZone.attr('x'), windowSpace.y1 = rockZone.attr('y')
+//  ,windowSpace.x2 = rockZone.attr('x')+rockZone.attr('width'), windowSpace.y2 = rockZone.attr('y')+rockZone.attr('height');
+// 	for (var i=0; i<allRocks.length; i++) {
+// 		var rock = allRocks[i], rockSpace = {};
+// 		rockSpace.x1 = rock.x, rockSpace.y1 = rock.y, rockSpace.x2 = rock.x+rock.width, rockSpace.y2 = rock.y+rock.height;
+// 		if (rockSpaceIsWithinWindowSpace(rockSpace, windowSpace)) {
+// 			rocksWithinWindow.push(rock);
+// 		}
+// 	}
+// 	return rocksWithinWindow;
+// }
+
+// I go by rocks, and see if that rock (plus other rocks) satisfies the category.
+// But instead, I should find 'rock chains' and see if any of them satisfy the category.
+// The rock chain has to be an isolated chain and satisfy the specifications.
+
+// var rockSatisfiesSandwichCategory = function(rockIDX) {
+// 	var satisfies = false;
+// 	var A = rocks[rockIDX]
+// 	   ,A_box = getCornersOf(A);
+// 	for (var i=0; i<rocks.length; i++) {
+// 		if (i!==rockIDX) {
+// 			var B = rocks[i]
+// 			   ,B_box = getCornersOf(B);
+// 			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box) && notOnExtremeDiagonal(A, B)) {
+// 				var rocksInBetween = findRocksBetween(A, B, A_box, B_box);
+// 				if (rocksInBetween.length>0 && wellSpaced(A, rocksInBetween, B)) {
+// 					satisfies = true;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return satisfies;
+// }
+
+// function wellSpaced(b1, rocks, b2) {
+// 	var allRocks = [b1].concat(rocks).concat([b2]);
+// 	for (var i=0; i<rocks.length; i++) {
+// 		if (!nearTwoOtherRocks(rocks[i], allRocks)) return false;
+// 	}
+// 	return true;
+// }
+
+// function nearTwoOtherRocks(rock, rocks) {
+// 	var closeRock1
+// 	   ,closeRock2;
+// 	for (var i=0; i<rocks.length; i++) {
+// 		var r = rocks[i]
+// 		   ,d = distanceBetweenRocks(rock, r);
+// 		if (r.ID!=rock.ID) {
+// 			if (!closeRock1 && !closeRock2) closeRock1 = {rock: r, dist: d};
+// 			else if (closeRock1 && !closeRock2 && r.ID!=closeRock1.rock.ID) closeRock2 = {rock: r, dist: d};
+// 			else if (closeRock1 && closeRock2 && r.ID!=closeRock1.rock.ID && r.ID!=closeRock2.rock.ID) {
+// 				if (closeRock1.dist<d && d<closeRock2.dist) closeRock2 = {rock: r, dist: d};
+// 				else if (closeRock2.dist<d && d<closeRock1.dist) closeRock1 = {rock: r, dist: d};
+// 				else if (d<closeRock1.dist && d<closeRock2.dist && closeRock1.dist<closeRock2.dist) closeRock2 = {rock: r, dist: d};
+// 				else if (d<closeRock1.dist && d<closeRock2.dist && closeRock2.dist<closeRock1.dist) closeRock1 = {rock: r, dist: d};
+// 			}
+// 		}
+// 	}
+// 	return closeRock1 && closeRock2 && closeRock1.dist<=largeRockHeight && closeRock2.dist<=largeRockHeight;
+// }
+
+// returns true if the average empty space in the sandwich is less than or equal to the height of a large rock
+// function containsSandwich(A, rocks, B) {
+// 	var vertical_arrangement = (B.y-(A.y+A.height))>(B.x-(A.x+A.width));
+// 	var emptySpace = vertical_arrangement ? B.y-(A.y+A.height) : B.x-(A.x+A.width)
+// 	var number_of_empty_spaces = rocks.length+1;
+//   return emptySpace/number_of_empty_spaces<=largeRockHeight
+// }

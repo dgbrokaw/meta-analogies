@@ -7,8 +7,7 @@ var Rock = function(type) {
 
 	this.x = null;
 	this.y = null;
-	this.width = null;
-	this.height = null;
+	this.dimension = null;
 
 	this.group = null;
 	this.rock = null;
@@ -26,18 +25,18 @@ Rock.prototype.setXY = function(x, y) {
 	// console.log('x: '+ this.x + ', y: ' + this.y);
 }
 
-Rock.prototype.updateSize = function() {
-	if (this.type==='small') {
-		this.width = smallRockWidth;
-		this.height = smallRockHeight;
-	} else if (this.type==='medium') {
-		this.width = mediumRockWidth;
-		this.height = mediumRockHeight;
-	} else {
-		this.width = largeRockWidth;
-		this.height = largeRockHeight;
-	}
-}
+// Rock.prototype.updateSize = function() {
+// 	if (this.type==='small') {
+// 		this.width = smallRockWidth;
+// 		this.height = smallRockHeight;
+// 	} else if (this.type==='medium') {
+// 		this.width = mediumRockWidth;
+// 		this.height = mediumRockHeight;
+// 	} else {
+// 		this.width = largeRockWidth;
+// 		this.height = largeRockHeight;
+// 	}
+// }
 
 Rock.prototype.rotateColor = function() {
 	this.color = (this.color+1)%3;
@@ -78,15 +77,17 @@ Rock.prototype.getHandleSelection = function() {
 // }
 
 Rock.prototype.getData = function() {
-	return {x: this.x
+	return {id: this.ID
+				 ,x: this.x
 		     ,y: this.y
-		     ,w: this.width
-		     ,h: this.height
+		     ,w: this.dimension
+		     ,h: this.dimension
 		     ,c: this.color};
 }
 
-var RockCollection = function() {
+var RockCollection = function(settings) {
 	this.rocks = [];
+	this.settings = tools.deepCopy(settings);
 }
 
 RockCollection.prototype.extendCollection = function(data) {
@@ -94,7 +95,7 @@ RockCollection.prototype.extendCollection = function(data) {
 		var datum = data[i];
 		var rock = new Rock(datum.type);
 		rock.setXY(datum.x, datum.y);
-		rock.updateSize();
+		this.setRockSize(rock, rock.type);
 		rock.borderColor = datum.border ? 'seagreen' : false;
 		this.rocks.push(rock);
 		if (datum.color) rock.color = datum.color;
@@ -117,6 +118,21 @@ RockCollection.prototype.getCollectionData = function() {
 	return data;
 }
 
+RockCollection.prototype.setRockSize = function(rock, type) {
+	rock.type = type;
+	switch (type) {
+		case 'small':
+			rock.dimension = this.settings.smallRockDimension;
+			break;
+		case 'medium':
+			rock.dimension = this.settings.mediumRockDimension;
+			break;
+		case 'large':
+			rock.dimension = this.settings.largeRockDimension;
+			break;
+	}
+}
+
 RockCollection.prototype.getRockByElement = function(el) {
 	var searchID = el.getAttribute('id');
 	for (var i=0; i<this.rocks.length; i++) {
@@ -136,6 +152,14 @@ RockCollection.prototype.getRockBySelection = function(selection) {
 			return this.rocks[i];
 	}
 	return null;
+}
+
+RockCollection.prototype.getRockByID = function(id) {
+	var rocks = this.getRocks();
+	for (var i=0; i<rocks.length; i++) {
+		if (rocks[i].ID === id) return rocks[i];
+	}
+	throw 'Attempted to find non-existant rock by id.';
 }
 
 RockCollection.prototype.getRockBySVG = function(svg) {

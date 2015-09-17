@@ -1,6 +1,8 @@
-var Game = function(subjectID) {
+var Game = function(subjectID, track, settings) {
 	this.subjectID = subjectID ? subjectID : null;
-	//this.stimuli = stimuli;
+  this.condition = track.condition;
+
+  this.phases = this.setupPhases(track.track, settings);
 
 	this.record = [];
 }
@@ -17,12 +19,54 @@ Game.prototype.getSubjectID = function() {
 	return this.subjectID;
 }
 
-Game.prototype.setCondition = function(condition) {
-  this.condition = condition;
+Game.prototype.setupPhases = function(track, settings) {
+  var self = this;
+  var instantiatedPhases = [];
+  track.forEach(function(phase, idx) {
+    var instantiatedPhase = new phases[phase[0]](phase[1], settings || {});
+    instantiatedPhase.phaseNum = idx;
+    instantiatedPhase.events
+      .on('start', function() { console.log('Phase', phase, 'has started') })
+      .on('data', self.addRow.bind(self))
+      .on('end', self.phaseEnd.bind(self));
+    instantiatedPhases.push(instantiatedPhase);
+  })
+  return instantiatedPhases;
+}
+
+Game.prototype.startGame = function() {
+  this.phases[0].start();
 }
 
 Game.prototype.addRow = function(data) {
+  data.subjectID = this.subjectID;
+  data.condition = this.condition;
 	this.record.push(data);
+}
+
+Game.prototype.phaseEnd = function(phaseNum) {
+  if (phaseNum+1 < this.phases.length) {
+    this.phases[phaseNum+1].start();
+  } else {
+    this.saveData(this.record);
+  }
+}
+
+Game.prototype.saveData = function(data) {
+  // using the FileSaver.js to save the game to file
+  // (should contain all user and test data)
+
+  var csv = d3.csv.format(data);
+  var blob = new Blob([csv], {type: 'text/csv'});
+  var fileName = ''
+    + (new Date()).toDateString().replace(/ /g, "-")
+    + 'subject' + this.getSubjectID()
+    + '.csv';
+  saveAs(blob, fileName);
+}
+
+Game.prototype.setCondition = function(condition) {
+  this.condition = condition;
 }
 
 Game.prototype.deleteLastRow = function() {

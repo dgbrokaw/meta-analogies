@@ -1,0 +1,94 @@
+<!doctype html>
+
+<title>Game Testing</title>
+
+<script src='d3.min.js'></script>
+<script src="FileSaver.js"></script>
+
+<script src="tools.js"></script>
+<script src="board.js"></script>
+
+<script src="game.js"></script>
+<script src="rock.js"></script>
+
+<script src="phases/phases.js"></script>
+<script src="phases/condition-phase.js"></script>
+<script src="phases/instructions-phase.js"></script>
+<script src="phases/interactive-phase.js"></script>
+<script src="phases/control-phase.js"></script>
+<script src="phases/test-phase.js"></script>
+
+<script src="categories/categories.js"></script>
+<script src="categories/sandwich.js"></script>
+
+<script src="setup.js"></script>
+
+<style>
+.noselect {
+	-webkit-user-select:none;
+}
+
+#instructions {
+	margin: 100px 30% 0 30%;
+	font-size: 14pt;
+}
+</style>
+
+<body>
+</body>
+
+<script>
+
+var trainingInstructions = [
+	"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arranging objects in a certain way; these arrangements are known as \"Togs.\" Your job is to learn as much as you can about what makes a Tog a Tog.  Keep in mind, training will be short and you will be tested on your knowledge of Togs later, so make the most of training!"
+, "On each training trial, you will see two sets of blocks contained by a border (one on the left and one on the right). Both left and right sets contain a Tog. To learn what makes a Tog a Tog, you may find it helpful to look at the two sets together."
+, "After you feel you have learned as much as you can from the trial you are on, move on to the next trial by clicking \"Next example.\"  There will only be three trials, so make the most of each of them! When you are ready, click \"Next\" to begin."
+, "After you feel you have learned as much as you can from the trial you are on, move on to the next trial by clicking \"Next example.\"  There will only be three trials, so make the most of each of them! When you are ready, click \"Next\" to begin."
+]
+
+var testingInstructions = [
+	"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
+]
+
+var farewellMessage = [
+	"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
+]
+
+var track1 = {
+	condition: 'condition1'
+
+, track: [
+  	['instruction', trainingInstructions]
+	, ['interaction', stuff]
+	, ['instruction', testingInstructions]
+	, ['test', testStimuli]
+	, ['instruction', farewellMessage]
+	]
+};
+
+var track2 = {
+	condition: 'condition2'
+
+, track: [
+		['instruction', trainingInstructions]
+	, ['control', testStimuli]
+	, ['instruction', testingInstructions]
+	, ['test', tools.deepCopy(testStimuli)]
+	, ['instruction', farewellMessage]
+	]
+};
+
+var conditionPhase = new ConditionPhase();
+conditionPhase.events.on('end', function(settings) {
+	var ID = settings.subjectID;
+
+	var track;
+	if (settings.condition === '1') track = track1;
+	else track = track2;
+
+	var game = new Game(ID, track);
+	game.startGame();
+})
+
+conditionPhase.start();
+</script>

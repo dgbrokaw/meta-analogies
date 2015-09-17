@@ -1,4 +1,4 @@
-// The InteractivePhase is a board containing one (or two) workspaces that
+// The InteractionPhase is a board containing one (or two) workspaces that
 // will react to whether the contents of that workspace contains elements
 // that are arranged according to a specified ruleset.  The elements are rocks
 // that are initialized in the reactive workspace as well as others outside of
@@ -7,238 +7,148 @@
 // See the list of default settings for settings that can be customized.
 // "Category" is the name of the category with which the workspace will be evaluated.
 
-var InteractivePhase = function(stimuli, settings) {
-	asGamePhase.call(this);
+var InteractionPhase = function(stimuli, settings) {
+	this.initSettings(settings);
 
-	this.events = d3.dispatch('start', 'data', 'end');
+	this.board = new Board(this.settings.boardArrangement, this.settings);
 
-	this.category = categories[stimuli.category];
+	this.initRockSettings(stimuli);
 
+	this.category = new categories[stimuli.category](this.settings);
+}
+asGamePhase.call(InteractionPhase);
+
+phases['interaction'] = InteractionPhase;
+
+InteractionPhase.defaultSettings = {
+	boardArrangement: [ ['margin']
+										,	['bench', 'rockZone']
+									 	, ['button', 'button'] ]
+	// boardArrangement: [ ['bench', 'rockZone']
+	// 								 	, ['button', 'button'] ]
+
+, correctTextResponse: 'This is a Tog!'
+, incorrectTextResponse: 'This is not a Tog.'
+
+, button1Text: 'Refresh'
+, button2Text: 'Next'
+}
+
+InteractionPhase.prototype.initSettings = function(settings) {
+	var settings = settings || {};
+
+  var defaults = tools.deepCopy(phases.defaultSettings);
+  defaults = tools.extend(defaults, InteractionPhase.defaultSettings || {});
+
+	this.settings = tools.extend(defaults, settings);
+}
+
+InteractionPhase.prototype.initRockSettings = function(stimuli) {
 	this.benchRocks = stimuli.benchRocks;
 	this.stimuli = stimuli.stimuli;
 
-	this.initializeSettings(settings);
-	this.calculateElementPositions();
-
-	this.currentStimuli = 0;
-	this.currentStateSatisfiesCategory = false;
-
-	this.collection = new RockCollection();
-}
-
-phases.InteractivePhase = InteractivePhase;
-
-InteractivePhase.prototype.calculateElementPositions = function() {
-	var temp = this.settings
-
-	temp.boardHeight = temp.rockZoneMargin + temp.rockZoneHeight + temp.benchWidth;
-	temp.boardWidth = temp.benchWidth + temp.rockZoneWidth + temp.rockZoneMargin;
-
-	temp.rockZoneX = temp.benchWidth;
-	temp.rockZoneY = temp.rockZoneMargin;
-
-	temp.buttonHeight = temp.benchWidth*1/2;
-	temp.buttonWidth = temp.boardWidth*1/4;
-	temp.button1CX = temp.boardWidth*1/3;
-	temp.button1CY = temp.rockZoneY + temp.rockZoneHeight + temp.rockZoneMargin/2;
-	temp.button2CX = temp.boardWidth*2/3;
-	temp.button2CY = temp.button1Y;
-
+	var temp = this.settings;
 	temp.smallRockDimension = temp.baseRockDimension;
 	temp.mediumRockDimension = temp.baseRockDimension * temp.mediumSizeMultiplier;
-	temp.largeRockDimension = temp.backRockDimension * temp.largeSizeMultiplier;
+	temp.largeRockDimension = temp.baseRockDimension * temp.largeSizeMultiplier;
 
-	this.stimuli.forEach(function(stimulus) {
-		stimulus.forEach(function(rock) {
-			rock.x += temp.rockZoneX; rock.y += temp.rockZoneY
-		})
-	});
+	for (var i=0; i<this.stimuli.length; i++) {
+		var stimulus = this.stimuli[i].rocks;
+		for (var j=0; j<stimulus.length; j++) {
+			var rock = stimulus[j];
+			rock.x += this.board.positions[1][1][0]; // [0][1] is the location of the rock zone it the board arrangement
+			rock.y += this.board.positions[1][1][1];
+		}
+	}
+
+	this.collection = new RockCollection(this.settings);
+
+	this.selectedRock = null;
 }
 
-InteractivePhase.prototype.start = function() {
-	this.setupBoard();
-	this.setupRockZone();
-	this.setupButton1('Refresh');
-	this.setupButton2('Next');
-	this.setupNextButtonListener();
-	this.setupRefreshButtonListener();
+InteractionPhase.prototype.start = function(stimuli, settings) {
+	// this.initSettings(settings);
+
+	// // this.category = categories[stimuli.category];
+
+	// this.board = new Board(this.settings.boardArrangement, this.settings);
+
+	// this.initRockSettings(stimuli);
+
+	this.board.initElements();
+
+	this.setupRefreshButton();
+	this.setupNextButton();
+
+	this.currentStimulus = 0;
+	this.currentStateSatisfiesCategory = false;
 
 	this.stimuli = shuffle(this.stimuli);
 	this.collection.extendCollection(this.benchRocks);
-	this.collection.extendCollection(this.stimuli[this.currentStimuli]);
+	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 
 	this.events.start();
 }
 
-InteractivePhase
-
-var currentExample = 0;
-
-var selectedRock = null;
-var correct = false;
-
-function setCorrect() {
-	correct = true;
+InteractionPhase.prototype.setupRefreshButton = function() {
+	var button = d3.select('#button0');
+	button.select('text').text(this.settings.button1Text);
+	button.on('click', this.clickRefresh.bind(this));
 }
 
-function setIncorrect() {
-	correct = false;
+InteractionPhase.prototype.clickRefresh = function() {
+	this.collectPhaseOneData('refresh')
+	this.collection.clearCollection();
+	this.collection.extendCollection(benchRockData);
+	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
+	this.setupRocks();
+	this.displayUserFeedback();
 }
 
-var showCorrect = function(zoneID) {
-	d3.select(zoneID)
-	  .attr('stroke', correctColor);
+InteractionPhase.prototype.setupNextButton = function() {
+	var button = d3.select('#button1');
+	button.select('text').text(this.settings.button2Text);
+	button.on('click', this.clickNext.bind(this));
 }
 
-var showIncorrect = function(zoneID) {
-	d3.select(zoneID)
-	  .attr('stroke', incorrectColor);
-}
-
-var showNeutral = function(zoneID) {
-	d3.select(zoneID)
-		.attr('stroke', 'rgb(112,112,112)');
-}
-
-function setupBoard() {
-	var svg = d3.select('body').append('svg')
-		.attr('id', 'board')
-		.attr('width', boardWidth)
-		.attr('height', boardHeight)
-		.classed('noselect', true);
-		//.style({ display:'block', margin:'auto', padding:'0' });
-
-	svg.append('rect')
-	   .style('fill', boardColor)
-	   .attr({width: '100%', height: '100%', 'stroke-width':'3', stroke:'rgb(0, 0, 0)'})
-	   .classed('noselect', true);
-
-	return svg;
-}
-
-// function setupControlRockZone() {
-// 	d3.select('#board').append('rect')
-// 		 .attr('id', 'controlZone')
-// 	   .style('fill', rockZoneColor)
-// 	   .attr({width: controlRockZoneWidth, height: controlRockZoneHeight, 'stroke-width': '6', stroke: correctColor})
-// 	   .attr({x: controlRockZoneX, y: controlRockZoneY})
-// 	   .classed('noselect', true);
-// }
-
-function setupUserRockZone() {
-	d3.select('#board').append('rect')
-		 .attr('id', 'userZone')
-	   .style('fill', rockZoneColor)
-	   .attr({width: userRockZoneWidth, height: userRockZoneHeight, 'stroke-width': '6', stroke: incorrectColor})
-	   .attr({x: userRockZoneX, y: userRockZoneY})
-	   .classed('noselect', true);
-	console.log(userRockZoneX);
-}
-
-function setupRefreshButton() {
-	var board = d3.select('#board');
-	var button = board.append('g')
-				.attr('id', 'refreshButton');
-	button.append('ellipse')
-		.attr('id', 'refreshButtonRect')
-		.style({fill: activatedButtonColor})
-		.attr({cx: refreshButtonCX, cy: refreshButtonCY, rx: buttonWidth, ry: buttonHeight});
-	button.append('text')
-		.style({fill: 'rgb(240,240,240)', stroke: 'none', 'font-family': 'sans-serif', 'font-style':'bold', 'font-size': 32})
-		.attr({x: refreshButtonCX-buttonWidth*2/8, y: refreshButtonCY+buttonHeight/5})
-		.text("Refresh");
-}
-
-function clickRefresh() {
-	collectPhaseOneData('refresh')
-	collection.clearCollection();
-	// collection.extendCollection(rockSetupData);
-	collection.extendCollection(trainStimuli[currentExample].rocks);
-	collection.extendCollection(benchRockData);
-	setupRocks();
-	displayUserFeedback();
-}
-
-function setupRefreshButtonListener() {
-	var button = d3.select('#refreshButton');
-	button.on('click', clickRefresh);
-}
-
-function setupNextButton() {
-	var board = d3.select('#board');
-	var button = board.append('g')
-				.attr('id', 'nextButton');
-  button.append('ellipse')
-		.attr('id', 'nextButtonRect')
-		.style({fill: buttonPushedColor})
-		.attr({cx: nextButtonCX, cy: nextButtonCY, rx: buttonWidth, ry: buttonHeight});
-	button.append('text')
-		.style({fill: 'black', stroke: 'none', 'font-family': 'sans-serif', 'font-style': 'bold', 'font-size': 32})
-		.attr({x: nextButtonCX-buttonWidth*3/7, y: nextButtonCY+buttonHeight/5})
-		//.attr({x: nextButtonX+10, y: nextButtonY+15})
-		.text("Next example");
-}
-
-function clickNext() {
-	if (correct && currentExample<trainStimuli.length-1) {
-		collectPhaseOneData('next');
-		collection.clearCollection();
-		// controlCollection.clearCollection();
-		currentExample++;
-		// collection.extendCollection(rockSetupData);
-		collection.extendCollection(benchRockData);
-		collection.extendCollection(trainStimuli[currentExample].rocks);
-		// controlCollection.extendCollection(trainStimuli[currentExample].rocks);
-		setupRocks();
-		// setupStimuli();
-		displayUserFeedback();
-		collectPhaseOneData('start');
-		// setIncorrect();
-	} else if (correct) {
-		collectPhaseOneData('next');
-		collection.clearCollection();
-		teardownPhaseOne();
-		displayTestingInstructions();
-		// initializePhaseTwo();
+InteractionPhase.prototype.clickNext = function() {
+	if (this.currentStateSatisfiesCategory && this.currentStimulus<trainStimuli.length-1) {
+		this.collectPhaseOneData('next');
+		this.collection.clearCollection();
+		this.currentStimulus++;
+		this.collection.extendCollection(benchRockData);
+		this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
+		this.setupRocks();
+		this.displayUserFeedback();
+		this.collectPhaseOneData('start');
+	} else if (this.currentStateSatisfiesCategory) {
+		this.collectPhaseOneData('next');
+		this.collection.clearCollection();
+		this.teardown();
+		this.events.end(this.phaseNum);
 	}
 }
 
-function setupNextButtonListener() {
-	var button = d3.select('#nextButton');
-	button.on('click', clickNext);
-}
-
-var activateNextButton = function() {
-	d3.select('#nextButtonRect').style({fill: activatedButtonColor});
-}
-
-var deactivateNextButton = function() {
-	d3.select('#nextButtonRect').style("fill", buttonPushedColor);
-}
-
-function setupRockDrag() {
+InteractionPhase.prototype.setupRockDrag = function() {
 	var rockDrag = d3.behavior.drag()
 	    	.origin(function(d) { return d; })
-	    	.on('dragstart', rockDragstart)
-	    	.on('drag', rockDragmove)
-	    	.on('dragend', rockDragend);
+	    	.on('dragstart', this.rockDragstart.bind(this))
+	    	.on('drag', this.rockDragmove.bind(this))
+	    	.on('dragend', this.rockDragend.bind(this));
 	return rockDrag;
 }
 
-function setupResizeDrag() {
+InteractionPhase.prototype.setupResizeDrag = function() {
 	var resizeDrag = d3.behavior.drag()
 				.origin(function(d) { return d; })
-				.on('dragstart', resizeDragstart)
-				.on('drag', resizeDragmove)
-				.on('dragend', resizeDragend);
+				.on('dragstart', this.resizeDragstart.bind(this))
+				.on('drag', this.resizeDragmove.bind(this))
+				.on('dragend', this.resizeDragend.bind(this));
 	return resizeDrag;
 }
 
-var rockDrag = setupRockDrag();
-var resizeDrag = setupResizeDrag();
-
-function createRockGroupSelection(rock) {
+InteractionPhase.prototype.createRockGroupSelection = function(rock) {
 	var board = d3.select('#board');
 	var d = rock.getData();
 	var rockGroup = board.append('g')
@@ -247,50 +157,59 @@ function createRockGroupSelection(rock) {
 	return rockGroup;
 }
 
-function createRockSelection(rock, group, disallowDrag) {
+InteractionPhase.prototype.createRockSelection = function(rock, group, disallowDrag) {
+	var phase = this;
+	if (!rock.getData().w) {
+		console.log(rock.getData())
+	}
 	var r = group.append('rect')
 						.attr('id', rock.getID())
 						.attr('x', function(d) { return d.x })
 						.attr('y', function(d) { return d.y })
 						.attr('width', function(d) { return d.w })
 						.attr('height', function(d) { return d.h })
-						.style('fill', function(d) { return rockColors[d.c] })
+						.style('fill', function(d) { return phase.settings.rockColors[d.c] })
 		    		.attr({'stroke-width': 3, 'stroke': (rock.borderColor ? rock.borderColor : 'black'), 'opacity': 1})
 		    		.style('fill-opacity', 0.75);
-	if (!disallowDrag) r.call(rockDrag);
+	if (!disallowDrag) r.call(phase.rockDrag);
   return r;
 }
 
-function createHandleSelection(rock, group) {
+InteractionPhase.prototype.createHandleSelection = function(rock, group) {
+	var phase = this;
 	var h = group.append('rect')
 						.attr('id', rock.getID()+'handle')
 						.attr('x', function(d) { return d.x+d.w*4/5 })
 						.attr('y', function(d) { return d.y+d.h*4/5 })
 						.attr('width', function(d) { return d.w*1/5 })
 						.attr('height', function(d) { return d.h*1/5 })
-						.style('fill', function(d) { return rockColors[d.c] })
+						.style('fill', function(d) { return phase.settings.rockColors[d.c] })
 						.style('fill-opacity', 0)
 						.attr('cursor', 'nwse-resize')
-    				.call(resizeDrag);
+    				.call(phase.resizeDrag);
   return h;
 }
 
-function setupRocks() {
-	var rocks = collection.getRocks();
+InteractionPhase.prototype.setupRocks = function() {
+	var rocks = this.collection.getRocks();
+
+	this.rockDrag = this.setupRockDrag();
+	this.resizeDrag = this.setupResizeDrag();
+
 	for (var i=0; i<rocks.length; i++) {
 		var rock = rocks[i];
-		var groupSelection = createRockGroupSelection(rock);
-		var rockSelection = createRockSelection(rock, groupSelection);
-		var handleSelection = createHandleSelection(rock, groupSelection);
+		var groupSelection = this.createRockGroupSelection(rock);
+		var rockSelection = this.createRockSelection(rock, groupSelection);
+		var handleSelection = this.createHandleSelection(rock, groupSelection);
 		rock.setGroupSelection(groupSelection);
 		rock.setRockSelection(rockSelection);
 		rock.setHandleSelection(handleSelection);
-		groupSelection.on('dblclick', dblclickRock)
+		groupSelection.on('dblclick', this.dblclickRock.bind(this))
 	}
-	displayUserFeedback();
+	this.displayUserFeedback();
 }
 
-// function setupStimuli() {
+// InteractionPhase.prototype.setupStimuli() {
 // 	var rocks = controlCollection.getRocks();
 // 	for (var i=0; i<rocks.length; i++) {
 // 		var rock = rocks[i];
@@ -302,73 +221,67 @@ function setupRocks() {
 // 	displayUserFeedback();
 // }
 
-var dblclickRock = function() {
-	var rock = collection.getRockByElement(this);
-	changeRockColor(rock);
-	displayUserFeedback();
-	// double-clicks end up recording two drag events, which are meaningless data.  here we remove those.
-	game.record.push();
-	game.record.push();
-	collectPhaseOneData('color');
+InteractionPhase.prototype.dblclickRock = function(d) {
+	var rock = this.collection.getRockByID(d.id);
+	this.changeRockColor(rock);
+	this.displayUserFeedback();
+	this.collectPhaseOneData('color');
 }
 
-function changeRockColor(rock) {
+InteractionPhase.prototype.changeRockColor = function(rock) {
 	rock.color = (rock.color+1)%3;
-	rock.getRockSelection().style('fill', rockColors[rock.color]);
-	rock.getHandleSelection().style('fill', rockColors[rock.color]);
+	rock.getRockSelection().style('fill', this.settings.rockColors[rock.color]);
+	rock.getHandleSelection().style('fill', this.settings.rockColors[rock.color]);
 }
 
-var draggedRock = null;
-var firstUpdate = true;
-
-function rockDragstart(d) {
-	var rock_sel = d3.select(this);
-	draggedRock = collection.getRockBySelection(rock_sel);
-  firstUpdate = true;
+InteractionPhase.prototype.rockDragstart = function(d) {
+	var rock_sel = d3.select('#'+d.id);
+	this.draggedRock = this.collection.getRockBySelection(rock_sel);
+  this.firstUpdate = true;
 }
 
-function rockDragmove(d) {
-	if (firstUpdate) {
+InteractionPhase.prototype.rockDragmove = function(d) {
+	if (this.firstUpdate) {
   	firstUpdate = false;
-  	d.c = draggedRock.color;
+  	d.c = this.draggedRock.color;
 	}
 	d.x = d3.event.x;
 	d.y = d3.event.y;
-	draggedRock.getRockSelection()
+	this.draggedRock.getRockSelection()
 		.attr('x', function(d) { return d.x })
 		.attr('y', function(d) { return d.y });
-	draggedRock.getHandleSelection()
+	this.draggedRock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 });
-	draggedRock.setXY(d.x, d.y);
-	displayUserFeedback();
+	this.draggedRock.setXY(d.x, d.y);
+	this.displayUserFeedback();
 }
 
-function rockDragend(d) {
-	slideToNonOverlappingPosition(draggedRock, d);
-	displayUserFeedback();
-	collectPhaseOneData('drag');
+InteractionPhase.prototype.rockDragend = function(d) {
+	this.slideToNonOverlappingPosition(this.draggedRock, d);
+	this.displayUserFeedback();
+	this.collectPhaseOneData('drag');
 }
 
-function slideToNonOverlappingPosition(draggedRock, data) {
+InteractionPhase.prototype.slideToNonOverlappingPosition = function(draggedRock, data) {
 	var slideDirection;
 	var overlappingRock
-	if (overlappingRock = overlappingAnotherRock(draggedRock)) {
-		slideDirection = slideRockInDirection(draggedRock, data, overlappingRock, slideDirection);
+	if (overlappingRock = this.overlappingAnotherRock(draggedRock)) {
+		slideDirection = this.slideRockInDirection(draggedRock, data, overlappingRock, slideDirection);
 	}
 }
 
-function overlappingAnotherRock(draggedRock) {
-	for (var i=0; i<collection.numberOfRocks(); i++) {
-		var rock = collection.rocks[i];
+InteractionPhase.prototype.overlappingAnotherRock = function(draggedRock) {
+	for (var i=0; i<this.collection.numberOfRocks(); i++) {
+		var rock = this.collection.rocks[i];
 		if (draggedRock.ID!==rock.ID && rectOverlap(draggedRock, rock)) return rock;
 	}
 	return false;
 }
 
-function slideRockInDirection(draggedRock, data, overlappingRock, slideDirection) {
+InteractionPhase.prototype.slideRockInDirection = function(draggedRock, data, overlappingRock, slideDirection) {
 	var direction = slideDirection;
-	slideStat = findDirectionAndDistance(draggedRock, overlappingRock, direction);
+	slideStat = this.findDirectionAndDistance(draggedRock, overlappingRock, direction);
 
 	var transition;
 	switch (slideStat.direction) {
@@ -411,17 +324,18 @@ function slideRockInDirection(draggedRock, data, overlappingRock, slideDirection
 	}
 	draggedRock.setXY(data.x, data.y);
 
-	var overlappingRock2 = overlappingAnotherRock(draggedRock);
+	var overlappingRock2 = this.overlappingAnotherRock(draggedRock);
+	var phase = this;
 	if (overlappingRock2) {
 		setTimeout(function() {
-			slideRockInDirection(draggedRock, data, overlappingRock2, slideStat.direction);
+			phase.slideRockInDirection(draggedRock, data, overlappingRock2, slideStat.direction);
 		}, 500);
 	}
 
 	return direction;
 }
 
-function findDirectionAndDistance(draggedRock, overlappingRock, direction) {
+InteractionPhase.prototype.findDirectionAndDistance = function(draggedRock, overlappingRock, direction) {
 	var stats = {};
 	var upDiff = draggedRock.y+draggedRock.height - overlappingRock.y
 	   ,leftDiff = draggedRock.x+draggedRock.width - overlappingRock.x
@@ -448,86 +362,77 @@ function findDirectionAndDistance(draggedRock, overlappingRock, direction) {
 	return stats;
 }
 
-var resizeBox = {};
-
-function resizeDragstart(d) {
-	var handle_sel = d3.select(this);
-	var rock = collection.getRockBySelection(handle_sel);
-	resizeBox.rock = rock;
-	resizeBox.box = appendResizeBox(rock);
-	resizeBox.handle = handle_sel;
-	resizeBox.handleCoor = [d.x+d.w*4/5, d.y+d.h*4/5];
-	resizeBox.otherSizes = getOtherSizes(rock.type);
-	resizeBox.offset = 0;
+InteractionPhase.prototype.resizeDragstart = function(d) {
+	this.resizeBox = {};
+	var rock_sel = d3.select('#'+d.id);
+	var rock = this.collection.getRockBySelection(rock_sel);
+	this.resizeBox.rock = rock;
+	this.resizeBox.box = this.appendResizeBox(rock);
+	this.resizeBox.handle = rock.handle;
+	this.resizeBox.handleCoor = [d.x+d.w*4/5, d.y+d.h*4/5];
+	this.resizeBox.otherSizes = this.getOtherSizes(rock.type);
+	this.resizeBox.offset = 0;
 }
 
-function resizeDragmove(d) {
+InteractionPhase.prototype.resizeDragmove = function(d) {
 	var diffX = d3.event.x - d.x
 	   ,diffY = d3.event.y - d.y;
 	var diff = diffX > diffY ? diffX : diffY;
-	resizeBox.offset = diff;
-	resizeBox.handle
-		.attr('x', resizeBox.handleCoor[0]+resizeBox.offset)
-		.attr('y', resizeBox.handleCoor[1]+resizeBox.offset);
-	resizeBox.box
-		.attr('width', resizeBox.width+resizeBox.offset)
-		.attr('height', resizeBox.height+resizeBox.offset);
-	if (!resizeBox.previewBox1) {
-		appendPreviewBoxes(resizeBox.rock);
+	this.resizeBox.offset = diff;
+	this.resizeBox.handle
+		.attr('x', this.resizeBox.handleCoor[0]+this.resizeBox.offset)
+		.attr('y', this.resizeBox.handleCoor[1]+this.resizeBox.offset);
+	this.resizeBox.box
+		.attr('width', this.resizeBox.width+this.resizeBox.offset)
+		.attr('height', this.resizeBox.height+this.resizeBox.offset);
+	if (!this.resizeBox.previewBox1) {
+		this.appendPreviewBoxes(this.resizeBox.rock);
 	}
 	var newSize;
-	if (newSize = resizeBoxInRangeOfOtherSize()) {
-		resizeBox.rock.type = newSize.type;
-		resizeBox.rock.updateSize();
-		d.w = resizeBox.rock.width;
-		d.h = resizeBox.rock.height;
-		resizeBox.rock.getRockSelection()
+	if (newSize = this.resizeBoxInRangeOfOtherSize()) {
+		this.collection.setRockSize(this.resizeBox.rock, newSize.type);
+		d.w = this.resizeBox.rock.dimension;
+		d.h = this.resizeBox.rock.dimension;
+		this.resizeBox.rock.getRockSelection()
 			.attr('width', function(d) { return d.w })
 			.attr('height', function(d) { return d.h });
-		displayUserFeedback();
-		collectPhaseOneData('resize');
-		clearPreviewBoxes();
-		resizeBox.otherSizes = getOtherSizes(resizeBox.rock.type);
-		appendPreviewBoxes(resizeBox.rock);
-		resizeBox.offset = 0;
+		this.displayUserFeedback();
+		this.collectPhaseOneData('resize');
+		this.clearPreviewBoxes();
+		this.resizeBox.otherSizes = this.getOtherSizes(this.resizeBox.rock.type);
+		this.appendPreviewBoxes(this.resizeBox.rock);
+		this.resizeBox.offset = 0;
 	}
 }
 
-function resizeDragend(d) {
-	clearPreviewBoxes();
-	resizeBox.box.remove();
-	resizeBox.rock.getHandleSelection()
+InteractionPhase.prototype.resizeDragend = function(d) {
+	this.clearPreviewBoxes();
+	this.resizeBox.box.remove();
+	this.resizeBox.rock.getHandleSelection()
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 })
 		.attr('width', function(d) { return d.w*1/5 })
 		.attr('height', function(d) { return d.h*1/5 });
-	delete resizeBox.rock;
-	delete resizeBox.box;
-	delete resizeBox.handle;
-	delete resizeBox.handleCoor;
-	delete resizeBox.otherSizes;
-	delete resizeBox.offset;
-	delete resizeBox.width;
-	delete resizeBox.height;
+	delete this.resizeBox;
 }
 
-function appendResizeBox(rock) {
-	resizeBox.width = rock.width;
-	resizeBox.height = rock.height;
+InteractionPhase.prototype.appendResizeBox = function(rock) {
+	this.resizeBox.width = rock.dimension;
+	this.resizeBox.height = rock.dimension;
 	var box = d3.select('#board').append('rect')
 		.attr('id', 'resizeBox')
 		.attr('x', rock.x)
 		.attr('y', rock.y)
-		.attr('width', rock.width)
-		.attr('height', rock.height)
+		.attr('width', rock.dimension)
+		.attr('height', rock.dimension)
 		.attr({'stroke-width': 1, 'stroke': 'black'})
 		.style({fill: 'none'});
 	return box;
 }
 
-function appendPreviewBoxes(rock) {
+InteractionPhase.prototype.appendPreviewBoxes = function(rock) {
 	var board = d3.select('#board');
-	otherSizes = resizeBox.otherSizes;
+	var otherSizes = this.resizeBox.otherSizes;
 	var box1 = board.append('rect')
 		.attr({x: rock.x, y: rock.y
 		      ,width: otherSizes[0].width, height: otherSizes[0].height})
@@ -538,25 +443,25 @@ function appendPreviewBoxes(rock) {
 					,width: otherSizes[1].width, height: otherSizes[1].height})
 		.attr({'stroke-width': 1, 'stroke': 'black', opacity: 0.5})
 		.style({fill: 'none'});
-	resizeBox.previewBox1 = box1;
-	resizeBox.previewBox2 = box2;
+	this.resizeBox.previewBox1 = box1;
+	this.resizeBox.previewBox2 = box2;
 }
 
-function clearPreviewBoxes() {
-	if (resizeBox.previewBox1) {
-		resizeBox.previewBox1.remove();
-		delete resizeBox.previewBox1;
+InteractionPhase.prototype.clearPreviewBoxes = function() {
+	if (this.resizeBox.previewBox1) {
+		this.resizeBox.previewBox1.remove();
+		delete this.resizeBox.previewBox1;
 	}
-	if (resizeBox.previewBox2) {
-		resizeBox.previewBox2.remove();
-		delete resizeBox.previewBox2;
+	if (this.resizeBox.previewBox2) {
+		this.resizeBox.previewBox2.remove();
+		delete this.resizeBox.previewBox2;
 	}
 }
 
-function getOtherSizes(size) {
-	var small = getSizeDimensions('small')
-	   ,medium = getSizeDimensions('medium')
-	   ,large = getSizeDimensions('large');
+InteractionPhase.prototype.getOtherSizes = function(size) {
+	var small = this.getSizeDimensions('small')
+	   ,medium = this.getSizeDimensions('medium')
+	   ,large = this.getSizeDimensions('large');
 	switch (size) {
 		case 'small':
 			return [medium, large];
@@ -567,87 +472,77 @@ function getOtherSizes(size) {
 	}
 }
 
-function getSizeDimensions(size) {
+InteractionPhase.prototype.getSizeDimensions = function(size) {
 	switch (size) {
 		case 'small':
-			return {type: 'small', width: smallRockWidth, height: smallRockHeight};
+			return {type: 'small', width: this.settings.smallRockDimension, height: this.settings.smallRockDimension};
 		case 'medium':
-			return {type: 'medium', width: mediumRockWidth, height: mediumRockHeight};
+			return {type: 'medium', width: this.settings.mediumRockDimension, height: this.settings.mediumRockDimension};
 		case 'large':
-			return {type: 'large', width: largeRockWidth, height: largeRockHeight};
+			return {type: 'large', width: this.settings.largeRockDimension, height: this.settings.largeRockDimension};
 	}
 }
 
-function resizeBoxInRangeOfOtherSize() {
-	var width = resizeBox.width+resizeBox.offset;
+InteractionPhase.prototype.resizeBoxInRangeOfOtherSize = function() {
+	var width = this.resizeBox.width+this.resizeBox.offset;
 	var halfBorderThickness = 3;
-	for (var i=0; i<resizeBox.otherSizes.length; i++) {
-		if (aboutEqual(width, resizeBox.otherSizes[i].width, 3))
-			return resizeBox.otherSizes[i];
+	for (var i=0; i<this.resizeBox.otherSizes.length; i++) {
+		if (aboutEqual(width, this.resizeBox.otherSizes[i].width, 3))
+			return this.resizeBox.otherSizes[i];
 	}
 	return false
 }
 
-function displayUserFeedback() {
-	// checkControlWindow();
-	checkUserWindow();
+InteractionPhase.prototype.displayUserFeedback = function() {
+	this.checkUserWindow();
 }
 
-// function checkControlWindow() {
-// 	//if (controlWindowSatisfiesSupportCategory()) {
-//   if (controlWindowSatisfiesSandwichCategory()) {
-// 		showCorrect('#controlZone');
-// 	} else {
-// 		showIncorrect('#controlZone');
-// 	}
-// }
-
-function checkUserWindow() {
-	//if (userWindowSatisfiesSupportCategory()) {
-	if (userWindowSatisfiesSandwichCategory()) {
-		showCorrect('#userZone');
-		setCorrect();
-		activateNextButton();
+InteractionPhase.prototype.checkUserWindow = function() {
+	if (this.category.windowSatisfiesCategory('#rockZone0', this.collection)) {
+		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.correctColor)
+		d3.select('#feedback').remove();
+		d3.select('#board').insert('text', '#rockZone0')
+			.attr('id', 'feedback')
+			.attr('x', this.board.positions[0][0][0])
+			.attr('y', this.board.positions[0][0][1])
+			.text(this.settings.correctTextResponse);
+		this.currentStateSatisfiesCategory = true;
+		this.board.setButtonColor('#button1', this.board.settings.activeButtonColor);
 	} else {
-		showIncorrect('#userZone');
-		setIncorrect();
-		deactivateNextButton();
+		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.incorrectColor);
+		d3.select('#feedback').remove();
+		d3.select('#board').insert('text', '#rockZone0')
+			.attr('id', 'feedback')
+			.attr('x', this.board.positions[0][0][0])
+			.attr('y', this.board.positions[0][0][1])
+			.text(this.settings.incorrectTextResponse);
+		this.currentStateSatisfiesCategory = false;
+		this.board.setButtonColor('#button1', this.board.settings.inactiveButtonColor);
 	}
 }
 
-function collectPhaseOneData(action) {
-	if (action==='color') {
-		// to change color, you dblclick, which has the side-effect of two drag events.  discard those extra two rows of data.
-		game.deleteLastRow();
-		game.deleteLastRow();
-	}
+InteractionPhase.prototype.collectPhaseOneData = function(action) {
+	// if (action==='color') {
+	// 	// to change color, you dblclick, which has the side-effect of two drag events.  discard those extra two rows of data.
+	// 	game.deleteLastRow();
+	// 	game.deleteLastRow();
+	// }
 	var d = new Date();
 	var dataRow = new Row();
 
-	dataRow.subjectID = game.getSubjectID();
+	// dataRow.subjectID = game.getSubjectID();
 	dataRow.date = d.toDateString();
 	dataRow.t = d.toTimeString();
-	dataRow.phase = 'train';
-	dataRow.stimulusNum = trainStimuli[currentExample].stimulusNum;
-	dataRow.userRocks = codifyUserRockData(getRocksWithinUserZoneWindow());
+	dataRow.phase = 'interactive';
+	dataRow.phaseNum = this.phaseNum;
+	dataRow.stimulusNum = this.stimuli[this.currentStimulus].stimulusNum;
+	dataRow.userRocks = codifyUserRockData(this.category.getRocksWithinWindow('#rockZone0', this.collection));
 	dataRow.userAction = action;
-	dataRow.userCorrect = correct;
+	dataRow.userCorrect = this.currentStateSatisfiesCategory;
 
 	console.log(dataRow);
-	game.addRow(dataRow);
-}
-
-function saveData(data) {
-	// using the FileSaver.js to save the game to file
-	// (should contain all user and test data)
-
-	var csv = d3.csv.format(data);
-	var blob = new Blob([csv], {type: 'text/csv'});
-	var fileName = ''
-		+	(new Date()).toDateString().replace(/ /g, "-")
-		+ 'subject' + game.getSubjectID()
-		+ '.csv';
-	saveAs(blob, fileName);
+	this.events.data(dataRow);
+	// game.addRow(dataRow);
 }
 
 function codifyUserRockData(rocks) {
@@ -663,82 +558,12 @@ function getURLParameter(name) {
 	return val ? decodeURIComponent(val[1]) : null;
 }
 
-// function getControlRockZoneDimensions() {
-// 	return {width: getURLParameter('width1'), height: getURLParameter('height1')};
-// }
-
-// function getUserRockZoneDimensions(controlRockZoneDimensions) {
-// 	var width = getURLParameter('width2')
-// 	   ,height = getURLParameter('height2');
-// 	if (!width) width = controlRockZoneDimensions.width;
-// 	if (!height) height = controlRockZoneDimensions.height;
-// 	return {width: width, height: height};
-// }
-
-// function getMaximumNumberOfObjects() {
-// 	return parseInt(getURLParameter('maxObjects'));
-// }
-
-function calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensions) {
-	if (controlRockZoneDimensions.height) {
-		controlRockZoneHeight = parseInt(controlRockZoneDimensions.height);
-	}
-	if (controlRockZoneDimensions.width) {
-		controlRockZoneWidth = parseInt(controlRockZoneDimensions.width);
-	}
-	if (userRockZoneDimensions.height) {
-		userRockZoneHeight = parseInt(userRockZoneDimensions.height);
-	}
-	if (userRockZoneDimensions.width) {
-		userRockZoneWidth = parseInt(userRockZoneDimensions.width);
-	}
-	// benchWidth = (controlRockZoneWidth+userRockZoneWidth)/2;
-
-	largestRockZoneHeight = (controlRockZoneHeight > userRockZoneHeight ? controlRockZoneHeight : userRockZoneHeight)
-	boardHeight = largestRockZoneHeight + rockZoneMargin*4
-	boardWidth = rockZoneMargin + controlRockZoneWidth + rockZoneMargin + userRockZoneWidth + benchWidth
-	controlRockZoneX = userRockZoneX + userRockZoneWidth + rockZoneMargin
-	buttonWidth = boardWidth*6/10*1/4
-	refreshButtonCX = boardWidth*1/3
-	refreshButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
-	nextButtonCX = boardWidth*2/3
-	nextButtonCY = controlRockZoneY+largestRockZoneHeight+(boardHeight-controlRockZoneY-largestRockZoneHeight)/2
-}
-
-function initializePhaseOne() {
-	// var controlRockZoneDimensions = getControlRockZoneDimensions();
-	// var userRockZoneDimensions = getUserRockZoneDimensions(controlRockZoneDimensions);
-	// var maximumNumberOfObjects = getMaximumNumberOfObjects();
-	// calculateBoardDimensions(controlRockZoneDimensions, userRockZoneDimensions);
-	setupBoard();
-	setupUserRockZone();
-	// setupControlRockZone();
-	setupRefreshButton();
-	setupNextButton();
-	setupNextButtonListener();
-	setupRefreshButtonListener();
-
-	trainStimuli = shuffle(trainStimuli);
-
-	// collection.extendCollection(rockSetupData);
-	collection.extendCollection(trainStimuli[currentExample].rocks);
-	// controlCollection.extendCollection(stimuli.data[currentExample]);
-	// controlCollection.extendCollection(trainStimuli[currentExample].rocks);
-
-	var benchRocks = benchRockData;
-	// if (maximumNumberOfObjects < benchRocks.length)
-	// 	benchRocks = benchRocks.slice(0, maximumNumberOfObjects);
-	collection.extendCollection(benchRocks);
-	setupRocks();
-	// setupStimuli();
+function aboutEqual(val1, val2, give) {
+	return val1 < val2 + give && val1 > val2 - give;
 }
 
 function shuffle(o) {
   o = o.slice();
   for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
   return o;
-}
-
-function teardownPhaseOne() {
-	d3.select('#board').remove();
 }
