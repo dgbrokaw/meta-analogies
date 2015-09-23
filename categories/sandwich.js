@@ -55,7 +55,7 @@ SandwichCategory.prototype.rockSatisfiesSandwichCategory = function(rockIDX) {
 }
 
 function areIdentical(A, B) {
-	return A.type===B.type && A.color===B.color;
+	return A.size===B.size && A.color===B.color;
 }
 
 function enoughSpaceBetween(A, B, dist) {
@@ -206,7 +206,7 @@ function CIsBetweenAAndB(C, A_box, B_box) {
 }
 
 function CSharesAPropertyWithA(C, A) {
-	return C.type===A.type || C.color===A.color;
+	return C.size===A.size || C.color===A.color;
 }
 
 function getTopLeftBottomRightLineSet(A_box, B_box) {

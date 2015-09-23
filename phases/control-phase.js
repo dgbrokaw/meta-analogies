@@ -13,13 +13,15 @@ ControlPhase.defaultSettings = {
 	boardArrangement: [ ['margin', 'rockZone', 'margin']
 										, ['button', 'margin', 'button'] ]
 
+, rockZone1ContentType: 'png' // 'code'
+
 , buttonHeight: 150
 , buttonWidth: 600
 
 , correctPositiveResponse: 'Correct, this is a Tog.'
 , incorrectPositiveResponse: 'No, this is not a Tog.'
 , correctNegativeResponse: 'Correct, this is not a Tog.'
-, incorrectNegativeResponse: 'No, this is a Tog.'
+, incorrectNegativeResponse: 'Incorrect, this is a Tog.'
 
 , button1Text: 'Not a Tog'
 , button2Text: 'Tog'
@@ -35,23 +37,28 @@ ControlPhase.prototype.initSettings = function(settings) {
 }
 
 ControlPhase.prototype.initRockSettings = function(stimuli) {
-	this.stimuli = stimuli;
+	this.stimuli = stimuli.stimuli;
+	this.answers = stimuli.answers;
 
 	var temp = this.settings;
 	temp.smallRockDimension = temp.baseRockDimension;
 	temp.mediumRockDimension = temp.baseRockDimension * temp.mediumSizeMultiplier;
 	temp.largeRockDimension = temp.baseRockDimension * temp.largeSizeMultiplier;
 
-	for (var i=0; i<this.stimuli.length; i++) {
-		var stimulus = this.stimuli[i].rocks;
-		for (var j=0; j<stimulus.length; j++) {
-			var rock = stimulus[j];
-			rock.x += this.board.positions[0][1][0]; // [0][1] is the location of the rock zone it the board arrangement
-			rock.y += this.board.positions[0][1][1];
-		}
+	this.collection = new RockCollection(this.settings);
+
+	if (this.settings.rockZone1ContentType === 'code') {
+		this.stimuli = this.stimuli.map(this.parseRockCode);
 	}
 
-	this.collection = new RockCollection(this.settings);
+	// for (var i=0; i<this.stimuli.length; i++) {
+	// 	var stimulus = this.stimuli[i].rocks;
+	// 	for (var j=0; j<stimulus.length; j++) {
+	// 		var rock = stimulus[j];
+	// 		rock.x += this.board.positions[0][1][0]; // [0][1] is the location of the rock zone it the board arrangement
+	// 		rock.y += this.board.positions[0][1][1];
+	// 	}
+	// }
 }
 
 ControlPhase.prototype.start = function() {
@@ -64,8 +71,16 @@ ControlPhase.prototype.start = function() {
 	this.currentStateSatisfiesCategory = false;
 
 	this.stimuli = tools.shuffle(this.stimuli);
-	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
-	this.setupRocks();
+	console.log(this.stimuli);
+
+	if (this.settings.rockZone1ContentType === 'code') {
+		this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+		this.setupRocks();
+	} else {
+		console.log('hi', this.board.positions[0][1], this.stimuli[this.currentStimulus])
+		this.clearImage();
+		this.setupImage(this.board.positions[0][1], this.stimuli[this.currentStimulus]);
+	}
 
 	this.events.start();
 }
@@ -77,6 +92,7 @@ ControlPhase.prototype.setupNoButton = function() {
 }
 
 ControlPhase.prototype.clickNo = function() {
+	if (this.givingFeedback) return;
 	this.responseGiven("no");
 }
 
@@ -87,6 +103,7 @@ ControlPhase.prototype.setupYesButton = function() {
 }
 
 ControlPhase.prototype.clickYes = function() {
+	if (this.givingFeedback) return;
 	this.responseGiven("yes");
 }
 
@@ -130,15 +147,21 @@ ControlPhase.prototype.setupRocks = function() {
 ControlPhase.prototype.responseGiven = function(response) {
 	var phase = this;
 	this.collectData(response);
+	this.givingFeedback = true;
 	this.displayFeedback(response);
 	setTimeout(function() {
 		phase.currentStimulus++;
 		phase.collection.clearCollection();
-		d3.select('#button0').select('text').text(phase.settings.button1Text).attr('transform', 'translate(75, -10)');
-		d3.select('#button1').select('text').text(phase.settings.button2Text).attr('transform', 'translate(120, -10)');
+		d3.select('#feedback').remove();
+		phase.givingFeedback = false;
 		if (phase.currentStimulus<phase.stimuli.length) {
-			phase.collection.extendCollection(phase.stimuli[phase.currentStimulus].rocks);
-			phase.setupRocks();
+			if (phase.settings.rockZone1ContentType === 'code') {
+				phase.collection.extendCollection(phase.stimuli[phase.currentStimulus]);
+				phase.setupRocks();
+			} else {
+				phase.clearImage();
+				phase.setupImage(phase.board.positions[0][1], phase.stimuli[phase.currentStimulus]);
+			}
 		} else {
 			phase.teardown();
 			phase.events.end(phase.phaseNum);
@@ -147,15 +170,28 @@ ControlPhase.prototype.responseGiven = function(response) {
 }
 
 ControlPhase.prototype.displayFeedback = function(response) {
-	var answerIsCorrect = response===this.stimuli[this.currentStimulus].answer;
+	var phase = this;
+	var feedbackBox = d3.select('#board').append('svg')
+											.attr('id', 'feedback')
+											.attr('x', phase.board.settings.boardWidth*2/5)
+											.attr('y', phase.board.settings.boardHeight*2/5)
+
+	feedbackBox.append('rect')
+  	.style({ 'width': phase.board.settings.buttonWidth*1/2
+  				 , 'height': phase.board.settings.buttonHeight*1/2
+  				 , 'stroke': 'black'
+  				 , 'stroke-width': '6'
+  				 , 'fill': 'white' });
+
+	var answerIsCorrect = response===this.answers[this.currentStimulus];
 	if (answerIsCorrect && response==='yes')
-		d3.select('#button1').select('text').text(this.settings.correctPositiveResponse).attr('transform', 'translate(0, -10)');
+		feedbackBox.append('text').text(this.settings.correctPositiveResponse).attr('transform', 'translate(60, 35)');
 	else if (answerIsCorrect && response==='no')
-		d3.select('#button0').select('text').text(this.settings.correctNegativeResponse).attr('transform', 'translate(0, -10)');
+		feedbackBox.append('text').text(this.settings.correctNegativeResponse).attr('transform', 'translate(60, 35)');
 	else if (!answerIsCorrect && response==='yes')
-		d3.select('#button1').select('text').text(this.settings.incorrectPositiveResponse).attr('transform', 'translate(0, -10)');
+		feedbackBox.append('text').text(this.settings.incorrectPositiveResponse).attr('transform', 'translate(60, 35)');
 	else if (!answerIsCorrect && response==='no')
-		d3.select('#button0').select('text').text(this.settings.incorrectNegativeResponse).attr('transform', 'translate(0, -10)');
+		feedbackBox.append('text').text(this.settings.incorrectNegativeResponse).attr('transform', 'translate(60, 35)');
 }
 
 ControlPhase.prototype.collectData = function(response) {
@@ -170,7 +206,7 @@ ControlPhase.prototype.collectData = function(response) {
 	dataRow.stimulusNum = this.stimuli[this.currentStimulus].stimulusNum;
 	dataRow.userRocks = null;
 	dataRow.userAction = response;
-	dataRow.userCorrect = response===this.stimuli[this.currentStimulus].answer;
+	dataRow.userCorrect = response===this.answers[this.currentStimulus];
 
 	console.log(dataRow);
 	this.events.data(dataRow);

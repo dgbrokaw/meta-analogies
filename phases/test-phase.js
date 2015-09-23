@@ -13,6 +13,8 @@ TestPhase.defaultSettings = {
 	boardArrangement: [ ['margin', 'rockZone', 'margin']
 										, ['button', 'margin', 'button'] ]
 
+, rockZone1ContentType: 'png' // 'code'
+
 , buttonHeight: 150
 , buttonWidth: 600
 
@@ -30,23 +32,27 @@ TestPhase.prototype.initSettings = function(settings) {
 }
 
 TestPhase.prototype.initRockSettings = function(stimuli) {
-	this.stimuli = stimuli;
+	this.stimuli = stimuli.stimuli;
 
 	var temp = this.settings;
 	temp.smallRockDimension = temp.baseRockDimension;
 	temp.mediumRockDimension = temp.baseRockDimension * temp.mediumSizeMultiplier;
 	temp.largeRockDimension = temp.baseRockDimension * temp.largeSizeMultiplier;
 
-	for (var i=0; i<this.stimuli.length; i++) {
-		var stimulus = this.stimuli[i].rocks;
-		for (var j=0; j<stimulus.length; j++) {
-			var rock = stimulus[j];
-			rock.x += this.board.positions[0][1][0]; // [0][1] is the location of the rock zone it the board arrangement
-			rock.y += this.board.positions[0][1][1];
-		}
+	this.collection = new RockCollection(this.settings);
+
+	if (this.settings.rockZone1ContentType === 'code') {
+		this.stimuli = this.stimuli.map(this.parseRockCode);
 	}
 
-	this.collection = new RockCollection(this.settings);
+	// for (var i=0; i<this.stimuli.length; i++) {
+	// 	var stimulus = this.stimuli[i].rocks;
+	// 	for (var j=0; j<stimulus.length; j++) {
+	// 		var rock = stimulus[j];
+	// 		rock.x += this.board.positions[0][1][0]; // [0][1] is the location of the rock zone it the board arrangement
+	// 		rock.y += this.board.positions[0][1][1];
+	// 	}
+	// }
 }
 
 TestPhase.prototype.start = function() {
@@ -59,8 +65,14 @@ TestPhase.prototype.start = function() {
 	this.currentStateSatisfiesCategory = false;
 
 	this.stimuli = tools.shuffle(this.stimuli);
-	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
-	this.setupRocks();
+
+	if (this.settings.rockZone1ContentType === 'code') {
+		this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+		this.setupRocks();
+	} else {
+		this.clearImage();
+		this.setupImage(this.board.positions[0][1], this.stimuli[this.currentStimulus]);
+	}
 
 	this.events.start();
 }
@@ -128,8 +140,13 @@ TestPhase.prototype.responseGiven = function(response) {
 	phase.currentStimulus++;
 	phase.collection.clearCollection();
 	if (phase.currentStimulus<phase.stimuli.length) {
-		phase.collection.extendCollection(phase.stimuli[phase.currentStimulus].rocks);
-		phase.setupRocks();
+		if (this.settings.rockZone1ContentType === 'code') {
+			phase.collection.extendCollection(phase.stimuli[phase.currentStimulus]);
+			phase.setupRocks();
+		} else {
+			this.clearImage();
+			this.setupImage(this.board.positions[0][1], this.stimuli[this.currentStimulus]);
+		}
 	} else {
 		phase.teardown();
 		phase.events.end(phase.phaseNum);

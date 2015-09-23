@@ -26,9 +26,10 @@ Board.defaultSettings = {
 , marginHeight: 50
 , marginWidth: 50
 
-  // determines whether every rock zone will have a text box at the top to
-  // give text feedback
-, descriptiveWorkspaces: false
+//   // determines whether every rock zone will have a text box at the top to
+//   // give text feedback
+// , descriptiveWorkspaces: false
+, rockZoneFillType: 'code' // 'png'
 
 , boardColor: 'white'
 , rockZoneColor: 'linen'

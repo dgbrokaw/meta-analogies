@@ -1,8 +1,8 @@
 var idCount = 0;
 
-var Rock = function(type) {
+var Rock = function(size) {
 	this.ID = 'rock' + idCount++;
-	this.type = type;
+	this.size = size;
 	this.color = 0;
 
 	this.x = null;
@@ -93,10 +93,10 @@ var RockCollection = function(settings) {
 RockCollection.prototype.extendCollection = function(data) {
 	for (var i=0; i<data.length; i++) {
 		var datum = data[i];
-		var rock = new Rock(datum.type);
+		var rock = new Rock(datum.size);
 		rock.setXY(datum.x, datum.y);
-		this.setRockSize(rock, rock.type);
-		rock.borderColor = datum.border ? 'seagreen' : false;
+		this.setRockSize(rock, rock.size);
+		rock.borderColor = datum.border ? 'darkturquoise' : false;
 		this.rocks.push(rock);
 		if (datum.color) rock.color = datum.color;
 	}
@@ -118,9 +118,9 @@ RockCollection.prototype.getCollectionData = function() {
 	return data;
 }
 
-RockCollection.prototype.setRockSize = function(rock, type) {
-	rock.type = type;
-	switch (type) {
+RockCollection.prototype.setRockSize = function(rock, size) {
+	rock.size = size;
+	switch (size) {
 		case 'small':
 			rock.dimension = this.settings.smallRockDimension;
 			break;
