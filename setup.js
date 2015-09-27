@@ -1,11 +1,10 @@
-var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
-                    ,{type: 'medium', x: 125, y: 100, color: 1}
-                    ,{type: 'large', x: 50, y: 180, border: true}
-                    ,{type: 'medium', x: 50, y: 275}
-                    ,{type: 'small', x: 150, y: 255, color: 1}
-                    ,{type: 'large', x: 50, y: 370, color: 1}
-                    ,{type: 'small', x: 50, y: 475, color: 2}
-                    ,{type: 'medium', x: 100, y: 475}]
+var benchRockData = [{type: 'small', x: 55, y: 200, color: 2}
+                  ,{type: 'small', x: 95, y: 200, color: 1}
+                  ,{type: 'small', x: 135, y: 200}
+                  ,{type: 'medium', x: 50, y: 260, color: 1}
+                  ,{type: 'medium', x: 125, y: 260, color: 2}
+                  ,{type: 'large', x: 25, y: 350}
+                  ,{type: 'large', x: 125, y: 350, color: 1}]
 
    ,rockSetupData = [{type: 'medium', color: 2, x: 150, y: 150, border: true}
     	              ,{type: 'medium', color: 1, x: 150, y: 227}
@@ -17,9 +16,7 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                     ,rocks: [{type: 'large', color: 0, border: true, x: 250, y: 150}
                             ,{type: 'small', color: 0, x: 280, y: 260}
                             ,{type: 'large', color: 0, border: true, x: 250, y: 310}
-                            ,{type: 'medium', color: 1, x: 20, y: 300}
-                            ,{type: 'small', color: 0, x: 350, y: 265}
-                            ,{type: 'large', color: 2, border: true, x: 400, y: 400}]}
+                            ,{type: 'medium', color: 1, x: 20, y: 300}]}
 
                    ,{phase: 'train'
                     ,stimulusNum: 2
@@ -28,46 +25,37 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                             ,{type: 'medium', color: 1, x: 190, y: 210}
                             ,{type: 'small', color: 2, x: 280, y: 220}
                             ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
-                            ,{type: 'medium', color: 2, x: 10, y: 198}
-                            ,{type: 'medium', color: 2, border: true, x: 410, y: 295}
-                            ,{type: 'small', color: 1, x: 20, y: 10}]}
+                            ,{type: 'medium', color: 2, x: 410, y: 295}]}
 
                    ,{phase: 'train'
                     ,stimulusNum: 3
                     ,category: 'sandwich'
                     ,rocks: [{type: 'small', color: 0, border: true, x: 150, y: 50}
-                            ,{type: 'medium', color: 0, x: 120, y: 120}
                             ,{type: 'small', color: 1, x: 140, y: 200}
                             ,{type: 'large', color: 0, x: 110, y: 244}
                             ,{type: 'small', color: 0, border: true, x: 150, y: 350}
-                            ,{type: 'small', color: 0, border: true, x: 300, y: 55}
-                            ,{type: 'medium', color: 1, x: 280, y: 125}
-                            ,{type: 'small', color: 1, x: 290, y: 210}
-                            ,{type: 'large', color: 0, x: 270, y: 260}
-                            ,{type: 'small', color: 0, border: true, x: 300, y: 355}]}]
+                            ,{type: 'small', color: 1, x: 330, y: 100}]}]
 
    ,stuff = {
       phase: 'train-interactive'
 
     , category: 'sandwich'
 
-    , benchRocks: [{type: 'small', x: 50, y: 100, color: 2}
-                  ,{type: 'medium', x: 125, y: 100, color: 1}
-                  ,{type: 'large', x: 50, y: 180, border: true}
-                  ,{type: 'medium', x: 50, y: 275}
-                  ,{type: 'small', x: 150, y: 255, color: 1}
-                  ,{type: 'large', x: 50, y: 370, color: 1}
-                  ,{type: 'small', x: 50, y: 475, color: 2}
-                  ,{type: 'medium', x: 100, y: 475}]
+    , benchRocks: [{type: 'small', x: 55, y: 200, color: 2}
+                  ,{type: 'small', x: 95, y: 200, color: 1}
+                  ,{type: 'small', x: 135, y: 200}
+                  ,{type: 'medium', x: 50, y: 260, color: 1}
+                  ,{type: 'medium', x: 125, y: 260, color: 2}
+                  ,{type: 'large', x: 25, y: 350}
+                  ,{type: 'large', x: 125, y: 350, color: 1}]
+
     , stimuli: [{phase: 'train'
                 ,stimulusNum: 1
                 ,category: 'sandwich'
                 ,rocks: [{type: 'large', color: 0, border: true, x: 250, y: 150}
                         ,{type: 'small', color: 0, x: 280, y: 260}
                         ,{type: 'large', color: 0, border: true, x: 250, y: 310}
-                        ,{type: 'medium', color: 1, x: 20, y: 300}
-                        ,{type: 'small', color: 0, x: 350, y: 265}
-                        ,{type: 'large', color: 2, border: true, x: 400, y: 400}]}
+                        ,{type: 'medium', color: 1, x: 20, y: 300}]}
 
                ,{phase: 'train'
                 ,stimulusNum: 2
@@ -76,23 +64,16 @@ var benchRockData = [{type: 'small', x: 50, y: 100, color: 2}
                         ,{type: 'medium', color: 1, x: 190, y: 210}
                         ,{type: 'small', color: 2, x: 280, y: 220}
                         ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
-                        ,{type: 'medium', color: 2, x: 10, y: 198}
-                        ,{type: 'medium', color: 2, border: true, x: 410, y: 295}
-                        ,{type: 'small', color: 1, x: 20, y: 10}]}
+                        ,{type: 'medium', color: 2, x: 410, y: 295}]}
 
                ,{phase: 'train'
                 ,stimulusNum: 3
                 ,category: 'sandwich'
                 ,rocks: [{type: 'small', color: 0, border: true, x: 150, y: 50}
-                        ,{type: 'medium', color: 0, x: 120, y: 120}
                         ,{type: 'small', color: 1, x: 140, y: 200}
                         ,{type: 'large', color: 0, x: 110, y: 244}
                         ,{type: 'small', color: 0, border: true, x: 150, y: 350}
-                        ,{type: 'small', color: 0, border: true, x: 300, y: 55}
-                        ,{type: 'medium', color: 1, x: 280, y: 125}
-                        ,{type: 'small', color: 1, x: 290, y: 210}
-                        ,{type: 'large', color: 0, x: 270, y: 260}
-                        ,{type: 'small', color: 0, border: true, x: 300, y: 355}]}]
+                        ,{type: 'small', color: 1, x: 330, y: 100}]}]
     }
 
    // ,stimuli = {category: "sandwich"
