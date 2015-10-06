@@ -39,25 +39,87 @@
 
 <script>
 
-var trainingInstructions = [
-	"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arranging objects in a certain way; these arrangements are known as \"Togs.\" Your job is to learn as much as you can about what makes a Tog a Tog.  Keep in mind, training will be short and you will be tested on your knowledge of Togs later, so make the most of training!"
-, "On each training trial, you will see two sets of blocks contained by a border (one on the left and one on the right). Both left and right sets contain a Tog. To learn what makes a Tog a Tog, you may find it helpful to look at the two sets together."
-, "After you feel you have learned as much as you can from the trial you are on, move on to the next trial by clicking \"Next example.\"  There will only be three trials, so make the most of each of them! When you are ready, click \"Next\" to begin."
-]
+// var trainingInstructions = [
+// 	"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arranging objects in a certain way; these arrangements are known as \"Togs.\" Your job is to learn as much as you can about what makes a Tog a Tog.  Keep in mind, training will be short and you will be tested on your knowledge of Togs later, so make the most of training!"
+// , "On each training trial, you will see two sets of blocks contained by a border (one on the left and one on the right). Both left and right sets contain a Tog. To learn what makes a Tog a Tog, you may find it helpful to look at the two sets together."
+// , "After you feel you have learned as much as you can from the trial you are on, move on to the next trial by clicking \"Next example.\"  There will only be three trials, so make the most of each of them! When you are ready, click \"Next\" to begin."
+// ]
 
-var testingInstructions = [
-	"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
-]
-
-var farewellMessage = [
-	"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
-]
-
-var tempData = {
-	category: 'sandwich'
-,	stimuli: [ "size:small,color:1,location:(592,193);size:small,color:2,location:(577,498);size:small,bordered,color:0,location:(490,200);size:medium,color:0,location:(483,253);size:medium,color:1,location:(481,328);size:large,color:0,location:(460,394);size:small,bordered,color:0,location:(500,500);size:small,bordered,color:0,location:(650,205);size:medium,color:1,location:(638,260);size:small,color:1,location:(657,353);size:large,color:0,location:(620,410);size:small,bordered,color:0,location:(650,505);"
-					 , "size:small,color:1,location:(500,100);size:small,color:2,location:(577,498);size:small,bordered,color:0,location:(490,200);size:medium,color:0,location:(483,253);size:medium,color:1,location:(481,328);size:large,color:0,location:(460,394);size:small,bordered,color:0,location:(500,500);size:small,bordered,color:0,location:(650,205);size:medium,color:1,location:(638,260);size:small,color:1,location:(657,353);size:large,color:0,location:(620,410);size:small,bordered,color:0,location:(650,505);" ]
+var trainingInstructions = {
+	type: 'message'
+, instructions: [
+		"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arrangements of objects that have certain properties; these arrangements are known as \"Togs.\" Your job is to figure out what properties are necessary to being a Tog."
+	, "On each training trial, you will see a bordered \'testing zone\' that contains an arrangement of blocks. By changing things about the arrangements, you can test to see what properties are necessary to being a Tog (instructions how to change arrangements will be on the following pages). When making your tests, the border of the testing zone gives you an important clue. When the border is green, the arrangement is a Tog; when it is red, it is NOT a Tog. By paying attention to the changes that cause the arrangement to come in and out of being a Tog, and trying lots of different changes, you will learn a lot about what makes a Tog."
+	, "You will be tested on your knowledge of Togs later, so make the most of each trial! There will be three different trials - you may go back and forth between them as much as you wish. When you are ready, click \"Next\" to learn how to change the arrangements."
+	]
 };
+
+var trainingInstructions2 = {
+	type: 'message'
+, instructions: [
+		"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arrangements of objects that have certain properties; these arrangements are known as \"Togs.\" Your job is to figure out what properties are necessary to being a Tog."
+	, "On each training trial, you will see an arrangement of blocks. With each arrangement, you will need to decide if it IS or IS NOT a Tog. After making your decision, you will be given corrective feedback. By paying attention to the properties of arrangements that ARE and ARE NOT Togs, you can learn what properties are necessary to being a Tog. At first you won\'t be able to tell what makes a Tog, but before long you should become quite good."
+	, "You will be tested on your knowledge of Togs later, so make the most of each trial! When you are ready, click \"Next\" to continue."
+	]
+}
+
+var interactiveConditionTutorial = [
+	{ type: 'image'
+	, instructions: 'tutorialpics/pics/Slide1.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide2.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide3.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide4.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide5.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide6.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide7.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide8.png' }
+]
+
+var hint = {
+	type: 'message'
+, instructions: [
+		 "To get you started in your learning, here is a hint: A Tog is a thing that has special objects surrounding other objects that have something in common with them. When you are ready, click \"Next\" to begin training."
+	]
+}
+
+var testingInstructions = {
+	type: 'message'
+, instructions: [
+		"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
+	]
+}
+
+var farewellMessage = {
+	type: 'message'
+, instructions: [
+		"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
+	]
+}
+
+// convert each instructions list into an object with type and list
+// type is to determing string/png
+// have image centered in screen
+
+// var testingInstructions = [
+// 	"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
+// ]
+
+// var farewellMessage = [
+// 	"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
+// ]
+
+// var tempData = {
+// 	category: 'sandwich'
+// ,	stimuli: [ "size:small,color:1,location:(592,193);size:small,color:2,location:(577,498);size:small,bordered,color:0,location:(490,200);size:medium,color:0,location:(483,253);size:medium,color:1,location:(481,328);size:large,color:0,location:(460,394);size:small,bordered,color:0,location:(500,500);size:small,bordered,color:0,location:(650,205);size:medium,color:1,location:(638,260);size:small,color:1,location:(657,353);size:large,color:0,location:(620,410);size:small,bordered,color:0,location:(650,505);"
+// 					 , "size:small,color:1,location:(500,100);size:small,color:2,location:(577,498);size:small,bordered,color:0,location:(490,200);size:medium,color:0,location:(483,253);size:medium,color:1,location:(481,328);size:large,color:0,location:(460,394);size:small,bordered,color:0,location:(500,500);size:small,bordered,color:0,location:(650,205);size:medium,color:1,location:(638,260);size:small,color:1,location:(657,353);size:large,color:0,location:(620,410);size:small,bordered,color:0,location:(650,505);" ]
+// };
 
 var tempImage = {
 	stimuli: ['smallFlame.png'
@@ -66,23 +128,57 @@ var tempImage = {
 	         ,'no']
 }
 
+// var track1 = {
+// 	condition: 'condition1'
+
+// , track: [
+//   	['instruction', trainingInstructions]
+// 	, ['interaction', tempData]
+// 	, ['instruction', testingInstructions]
+// 	, ['test', testStimuli]
+// 	, ['instruction', farewellMessage]
+// 	]
+// };
+
 var track1 = {
 	condition: 'condition1'
 
 , track: [
-  	['instruction', trainingInstructions]
-	, ['interaction', tempData]
+		['instruction', trainingInstructions]
+	, ['instruction', interactiveConditionTutorial[0]]
+	, ['instruction', interactiveConditionTutorial[1]]
+	, ['instruction', interactiveConditionTutorial[2]]
+	, ['instruction', interactiveConditionTutorial[3]]
+	, ['instruction', interactiveConditionTutorial[4]]
+	, ['instruction', interactiveConditionTutorial[5]]
+	, ['instruction', interactiveConditionTutorial[6]]
+	, ['instruction', interactiveConditionTutorial[7]]
+	, ['instruction', hint]
+	, ['interaction', stuff]
 	, ['instruction', testingInstructions]
 	, ['test', testStimuli]
 	, ['instruction', farewellMessage]
 	]
 };
 
+// var track2 = {
+// 	condition: 'condition2'
+
+// , track: [
+// 		['instruction', trainingInstructions]
+// 	, ['control', tempImage]
+// 	, ['instruction', testingInstructions]
+// 	, ['test', tools.deepCopy(testStimuli)]
+// 	, ['instruction', farewellMessage]
+// 	]
+// };
+
 var track2 = {
 	condition: 'condition2'
 
 , track: [
-		['instruction', trainingInstructions]
+		['instruction', trainingInstructions2]
+	, ['instruction', hint]
 	, ['control', tempImage]
 	, ['instruction', testingInstructions]
 	, ['test', tools.deepCopy(testStimuli)]

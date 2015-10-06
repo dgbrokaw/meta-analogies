@@ -56,16 +56,17 @@ InteractionPhase.prototype.initRockSettings = function(stimuli) {
 
 	this.collection = new RockCollection(this.settings);
 
-	this.stimuli = this.stimuli.map(this.parseRockCode);
+	// this.stimuli = this.stimuli.map(this.parseRockCode);
 
-	// for (var i=0; i<this.stimuli.length; i++) {
-	// 	var stimulus = this.stimuli[i];
-	// 	for (var j=0; j<stimulus.length; j++) {
-	// 		var rock = stimulus[j];
-	// 		rock.x += this.board.positions[1][1][0]; // [1][1] is the location of the rock zone it the board arrangement
-	// 		rock.y += this.board.positions[1][1][1];
-	// 	}
-	// }
+	for (var i=0; i<this.stimuli.length; i++) {
+		// var stimulus = this.stimuli[i];
+		var stimulus = this.stimuli[i].rocks;
+		for (var j=0; j<stimulus.length; j++) {
+			var rock = stimulus[j];
+			rock.x += this.board.positions[1][1][0]; // [1][1] is the location of the rock zone it the board arrangement
+			rock.y += this.board.positions[1][1][1];
+		}
+	}
 
 	this.selectedRock = null;
 }
@@ -81,7 +82,8 @@ InteractionPhase.prototype.start = function(stimuli, settings) {
 	this.currentStateSatisfiesCategory = false;
 
 	this.stimuli = shuffle(this.stimuli);
-	this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 
 	this.events.start();
@@ -100,7 +102,8 @@ InteractionPhase.prototype.clickBack = function() {
 	this.collectPhaseOneData('back');
 	this.collection.clearCollection();
 	this.currentStimulus--;
-	this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 	this.displayUserFeedback();
 	this.collectPhaseOneData('start');
@@ -115,7 +118,8 @@ InteractionPhase.prototype.setupRefreshButton = function() {
 InteractionPhase.prototype.clickRefresh = function() {
 	this.collectPhaseOneData('refresh')
 	this.collection.clearCollection();
-	this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 	this.displayUserFeedback();
 }
@@ -132,7 +136,8 @@ InteractionPhase.prototype.clickNext = function() {
 		this.collectPhaseOneData('next');
 		this.collection.clearCollection();
 		this.currentStimulus++;
-		this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+		// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+		this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 		this.setupRocks();
 		this.displayUserFeedback();
 		this.collectPhaseOneData('start');

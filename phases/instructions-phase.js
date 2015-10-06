@@ -1,5 +1,6 @@
 var InstructionsPhase = function(instructions) {
-	this.instructions = instructions;
+	this.instructionsType = instructions.type;
+	this.instructions = instructions.instructions;
 
 	this.events = d3.dispatch('start', 'data', 'end');
 }
@@ -21,9 +22,18 @@ InstructionsPhase.prototype.setupInstructions = function() {
 	var div = d3.select('body').append('div')
 		.attr('id', 'instructions');
 
-	this.instructions.forEach(function(instruction) {
-		div.append('p').text(instruction);
-	})
+	if (this.instructionsType === 'message') {
+		this.instructions.forEach(function(instruction) {
+			div.append('p').text(instruction);
+		});
+	} else {
+		div.append('img')
+			.attr('x', '3px')
+			.attr('y', '3px')
+			.attr('width', '1000px')
+			.attr('height', '800px')
+			.attr('src', this.instructions);
+	}
 
 	div.append('div').attr('id', 'advanceButtonDiv').append('button')
 		.attr('id', 'advance')
