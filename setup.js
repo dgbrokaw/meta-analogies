@@ -1,11 +1,10 @@
-var benchRockData = [{size: 'small', x: 50, y: 100, color: 2}
-                    ,{size: 'medium', x: 125, y: 100, color: 1}
-                    ,{size: 'large', x: 50, y: 180, border: true}
-                    ,{size: 'medium', x: 50, y: 275}
-                    ,{size: 'small', x: 150, y: 255, color: 1}
-                    ,{size: 'large', x: 50, y: 370, color: 1}
-                    ,{size: 'small', x: 50, y: 475, color: 2}
-                    ,{size: 'medium', x: 100, y: 475}]
+var benchRockData = [{type: 'small', x: 55, y: 200, color: 2}
+                  ,{type: 'small', x: 95, y: 200, color: 1}
+                  ,{type: 'small', x: 135, y: 200}
+                  ,{type: 'medium', x: 50, y: 260, color: 1}
+                  ,{type: 'medium', x: 125, y: 260, color: 2}
+                  ,{type: 'large', x: 25, y: 350}
+                  ,{type: 'large', x: 125, y: 350, color: 1}]
 
    ,rockSetupData = [{size: 'medium', color: 2, x: 150, y: 150, border: true}
     	              ,{size: 'medium', color: 1, x: 150, y: 227}
@@ -14,85 +13,67 @@ var benchRockData = [{size: 'small', x: 50, y: 100, color: 2}
    ,trainStimuli = [{phase: 'train'
                     ,stimulusNum: 1
                     ,category: 'sandwich'
-                    ,rocks: [{size: 'large', color: 0, border: true, x: 250, y: 150}
-                            ,{size: 'small', color: 0, x: 280, y: 260}
-                            ,{size: 'large', color: 0, border: true, x: 250, y: 310}
-                            ,{size: 'medium', color: 1, x: 20, y: 300}
-                            ,{size: 'small', color: 0, x: 350, y: 265}
-                            ,{size: 'large', color: 2, border: true, x: 400, y: 400}]}
+                    ,rocks: [{type: 'large', color: 0, border: true, x: 250, y: 150}
+                            ,{type: 'small', color: 0, x: 280, y: 260}
+                            ,{type: 'large', color: 0, border: true, x: 250, y: 310}
+                            ,{type: 'medium', color: 1, x: 20, y: 300}]}
 
                    ,{phase: 'train'
                     ,stimulusNum: 2
                     ,category: 'sandwich'
-                    ,rocks: [{size: 'medium', color: 2, border: true, x: 100, y: 200}
-                            ,{size: 'medium', color: 1, x: 190, y: 210}
-                            ,{size: 'small', color: 2, x: 280, y: 220}
-                            ,{size: 'medium', color: 2, border: true, x: 340, y: 220}
-                            ,{size: 'medium', color: 2, x: 10, y: 198}
-                            ,{size: 'medium', color: 2, border: true, x: 410, y: 295}
-                            ,{size: 'small', color: 1, x: 20, y: 10}]}
+                    ,rocks: [{type: 'medium', color: 2, border: true, x: 100, y: 200}
+                            ,{type: 'medium', color: 1, x: 190, y: 210}
+                            ,{type: 'small', color: 2, x: 280, y: 220}
+                            ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
+                            ,{type: 'medium', color: 2, x: 410, y: 295}]}
 
                    ,{phase: 'train'
                     ,stimulusNum: 3
                     ,category: 'sandwich'
-                    ,rocks: [{size: 'small', color: 0, border: true, x: 150, y: 50}
-                            ,{size: 'medium', color: 0, x: 120, y: 120}
-                            ,{size: 'small', color: 1, x: 140, y: 200}
-                            ,{size: 'large', color: 0, x: 110, y: 244}
-                            ,{size: 'small', color: 0, border: true, x: 150, y: 350}
-                            ,{size: 'small', color: 0, border: true, x: 300, y: 55}
-                            ,{size: 'medium', color: 1, x: 280, y: 125}
-                            ,{size: 'small', color: 1, x: 290, y: 210}
-                            ,{size: 'large', color: 0, x: 270, y: 260}
-                            ,{size: 'small', color: 0, border: true, x: 300, y: 355}]}]
+                    ,rocks: [{type: 'small', color: 0, border: true, x: 150, y: 50}
+                            ,{type: 'small', color: 1, x: 140, y: 200}
+                            ,{type: 'large', color: 0, x: 110, y: 244}
+                            ,{type: 'small', color: 0, border: true, x: 150, y: 350}
+                            ,{type: 'small', color: 1, x: 330, y: 100}]}]
 
    ,stuff = {
       phase: 'train-interactive'
 
     , category: 'sandwich'
 
-    , benchRocks: [{size: 'small', x: 50, y: 100, color: 2}
-                  ,{size: 'medium', x: 125, y: 100, color: 1}
-                  ,{size: 'large', x: 50, y: 180, border: true}
-                  ,{size: 'medium', x: 50, y: 275}
-                  ,{size: 'small', x: 150, y: 255, color: 1}
-                  ,{size: 'large', x: 50, y: 370, color: 1}
-                  ,{size: 'small', x: 50, y: 475, color: 2}
-                  ,{size: 'medium', x: 100, y: 475}]
+    , benchRocks: [{type: 'small', x: 55, y: 200, color: 2}
+                  ,{type: 'small', x: 95, y: 200, color: 1}
+                  ,{type: 'small', x: 135, y: 200}
+                  ,{type: 'medium', x: 50, y: 260, color: 1}
+                  ,{type: 'medium', x: 125, y: 260, color: 2}
+                  ,{type: 'large', x: 25, y: 350}
+                  ,{type: 'large', x: 125, y: 350, color: 1}]
+
     , stimuli: [{phase: 'train'
                 ,stimulusNum: 1
                 ,category: 'sandwich'
-                ,rocks: [{size: 'large', color: 0, border: true, x: 250, y: 150}
-                        ,{size: 'small', color: 0, x: 280, y: 260}
-                        ,{size: 'large', color: 0, border: true, x: 250, y: 310}
-                        ,{size: 'medium', color: 1, x: 20, y: 300}
-                        ,{size: 'small', color: 0, x: 350, y: 265}
-                        ,{size: 'large', color: 2, border: true, x: 400, y: 400}]}
+                ,rocks: [{type: 'large', color: 0, border: true, x: 250, y: 150}
+                        ,{type: 'small', color: 0, x: 280, y: 260}
+                        ,{type: 'large', color: 0, border: true, x: 250, y: 310}
+                        ,{type: 'medium', color: 1, x: 20, y: 300}]}
 
                ,{phase: 'train'
                 ,stimulusNum: 2
                 ,category: 'sandwich'
-                ,rocks: [{size: 'medium', color: 2, border: true, x: 100, y: 200}
-                        ,{size: 'medium', color: 1, x: 190, y: 210}
-                        ,{size: 'small', color: 2, x: 280, y: 220}
-                        ,{size: 'medium', color: 2, border: true, x: 340, y: 220}
-                        ,{size: 'medium', color: 2, x: 10, y: 198}
-                        ,{size: 'medium', color: 2, border: true, x: 410, y: 295}
-                        ,{size: 'small', color: 1, x: 20, y: 10}]}
+                ,rocks: [{type: 'medium', color: 2, border: true, x: 100, y: 200}
+                        ,{type: 'medium', color: 1, x: 190, y: 210}
+                        ,{type: 'small', color: 2, x: 280, y: 220}
+                        ,{type: 'medium', color: 2, border: true, x: 340, y: 220}
+                        ,{type: 'medium', color: 2, x: 410, y: 295}]}
 
                ,{phase: 'train'
                 ,stimulusNum: 3
                 ,category: 'sandwich'
-                ,rocks: [{size: 'small', color: 0, border: true, x: 150, y: 50}
-                        ,{size: 'medium', color: 0, x: 120, y: 120}
-                        ,{size: 'small', color: 1, x: 140, y: 200}
-                        ,{size: 'large', color: 0, x: 110, y: 244}
-                        ,{size: 'small', color: 0, border: true, x: 150, y: 350}
-                        ,{size: 'small', color: 0, border: true, x: 300, y: 55}
-                        ,{size: 'medium', color: 1, x: 280, y: 125}
-                        ,{size: 'small', color: 1, x: 290, y: 210}
-                        ,{size: 'large', color: 0, x: 270, y: 260}
-                        ,{size: 'small', color: 0, border: true, x: 300, y: 355}]}]
+                ,rocks: [{type: 'small', color: 0, border: true, x: 150, y: 50}
+                        ,{type: 'small', color: 1, x: 140, y: 200}
+                        ,{type: 'large', color: 0, x: 110, y: 244}
+                        ,{type: 'small', color: 0, border: true, x: 150, y: 350}
+                        ,{type: 'small', color: 1, x: 330, y: 100}]}]
     }
 
    // ,stimuli = {category: "sandwich"
