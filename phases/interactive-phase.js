@@ -532,7 +532,8 @@ InteractionPhase.prototype.checkUserWindow = function() {
 			.attr('id', 'feedback')
 			.attr('x', this.board.positions[0][0][0])
 			.attr('y', this.board.positions[0][0][1])
-			.text(this.settings.correctTextResponse);
+			.text(this.settings.correctTextResponse)
+			.style({'font-size': '200%'});
 		this.currentStateSatisfiesCategory = true;
 		this.board.setButtonColor('#button1', this.board.settings.activeButtonColor);
 	} else {
