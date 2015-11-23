@@ -47,6 +47,7 @@ InteractionPhase.prototype.initSettings = function(settings) {
 }
 
 InteractionPhase.prototype.initRockSettings = function(stimuli) {
+	this.benchRocks = stimuli.benchRocks;
 	this.stimuli = stimuli.stimuli;
 
 	var temp = this.settings;
@@ -83,6 +84,7 @@ InteractionPhase.prototype.start = function(stimuli, settings) {
 
 	this.stimuli = shuffle(this.stimuli);
 	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 
@@ -103,6 +105,7 @@ InteractionPhase.prototype.clickBack = function() {
 	this.collection.clearCollection();
 	this.currentStimulus--;
 	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 	this.displayUserFeedback();
@@ -119,6 +122,7 @@ InteractionPhase.prototype.clickRefresh = function() {
 	this.collectPhaseOneData('refresh')
 	this.collection.clearCollection();
 	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 	this.displayUserFeedback();
@@ -137,6 +141,7 @@ InteractionPhase.prototype.clickNext = function() {
 		this.collection.clearCollection();
 		this.currentStimulus++;
 		// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+		this.collection.extendCollection(this.benchRocks);
 		this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 		this.setupRocks();
 		this.displayUserFeedback();
@@ -397,7 +402,7 @@ InteractionPhase.prototype.resizeDragstart = function(d) {
 	this.resizeBox.box = this.appendResizeBox(rock);
 	this.resizeBox.handle = rock.handle;
 	this.resizeBox.handleCoor = [d.x+d.w*4/5, d.y+d.h*4/5];
-	this.resizeBox.otherSizes = this.getOtherSizes(rock.type);
+	this.resizeBox.otherSizes = this.getOtherSizes(rock.size);
 	this.resizeBox.offset = 0;
 }
 

@@ -28,10 +28,10 @@ InstructionsPhase.prototype.setupInstructions = function() {
 		});
 	} else {
 		div.append('img')
-			.attr('x', '3px')
-			.attr('y', '3px')
-			.attr('width', '1000px')
-			.attr('height', '800px')
+			.attr('x', '300px')
+			.attr('y', '300px')
+			// .attr('width', '100%')
+			// .attr('height', '100%')
 			.attr('src', this.instructions);
 	}
 
