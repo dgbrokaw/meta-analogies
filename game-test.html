@@ -39,12 +39,6 @@
 
 <script>
 
-// var trainingInstructions = [
-// 	"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arranging objects in a certain way; these arrangements are known as \"Togs.\" Your job is to learn as much as you can about what makes a Tog a Tog.  Keep in mind, training will be short and you will be tested on your knowledge of Togs later, so make the most of training!"
-// , "On each training trial, you will see two sets of blocks contained by a border (one on the left and one on the right). Both left and right sets contain a Tog. To learn what makes a Tog a Tog, you may find it helpful to look at the two sets together."
-// , "After you feel you have learned as much as you can from the trial you are on, move on to the next trial by clicking \"Next example.\"  There will only be three trials, so make the most of each of them! When you are ready, click \"Next\" to begin."
-// ]
-
 var trainingInstructions = {
 	type: 'message'
 , instructions: [
@@ -103,18 +97,6 @@ var farewellMessage = {
 	]
 }
 
-// convert each instructions list into an object with type and list
-// type is to determing string/png
-// have image centered in screen
-
-// var testingInstructions = [
-// 	"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
-// ]
-
-// var farewellMessage = [
-// 	"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
-// ]
-
 // var tempData = {
 // 	category: 'sandwich'
 // ,	stimuli: [ "size:small,color:1,location:(592,193);size:small,color:2,location:(577,498);size:small,bordered,color:0,location:(490,200);size:medium,color:0,location:(483,253);size:medium,color:1,location:(481,328);size:large,color:0,location:(460,394);size:small,bordered,color:0,location:(500,500);size:small,bordered,color:0,location:(650,205);size:medium,color:1,location:(638,260);size:small,color:1,location:(657,353);size:large,color:0,location:(620,410);size:small,bordered,color:0,location:(650,505);"
@@ -127,18 +109,6 @@ var tempImage = {
 ,	answers: ['yes'
 	         ,'no']
 }
-
-// var track1 = {
-// 	condition: 'condition1'
-
-// , track: [
-//   	['instruction', trainingInstructions]
-// 	, ['interaction', tempData]
-// 	, ['instruction', testingInstructions]
-// 	, ['test', testStimuli]
-// 	, ['instruction', farewellMessage]
-// 	]
-// };
 
 var track1 = {
 	condition: 'condition1'
@@ -160,18 +130,6 @@ var track1 = {
 	, ['instruction', farewellMessage]
 	]
 };
-
-// var track2 = {
-// 	condition: 'condition2'
-
-// , track: [
-// 		['instruction', trainingInstructions]
-// 	, ['control', tempImage]
-// 	, ['instruction', testingInstructions]
-// 	, ['test', tools.deepCopy(testStimuli)]
-// 	, ['instruction', farewellMessage]
-// 	]
-// };
 
 var track2 = {
 	condition: 'condition2'

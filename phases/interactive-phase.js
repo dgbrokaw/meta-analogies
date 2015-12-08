@@ -88,6 +88,7 @@ InteractionPhase.prototype.start = function(stimuli, settings) {
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
 
+	this.t1 = Date.now();
 	this.events.start();
 }
 
@@ -555,27 +556,24 @@ InteractionPhase.prototype.checkUserWindow = function() {
 }
 
 InteractionPhase.prototype.collectPhaseOneData = function(action) {
-	// if (action==='color') {
-	// 	// to change color, you dblclick, which has the side-effect of two drag events.  discard those extra two rows of data.
-	// 	game.deleteLastRow();
-	// 	game.deleteLastRow();
-	// }
-	var d = new Date();
 	var dataRow = new Row();
 
 	// dataRow.subjectID = game.getSubjectID();
-	dataRow.date = d.toDateString();
-	dataRow.t = d.toTimeString();
+
 	dataRow.phase = 'interactive';
-	dataRow.phaseNum = this.phaseNum;
-	dataRow.stimulusNum = this.stimuli[this.currentStimulus].stimulusNum;
-	dataRow.userRocks = codifyUserRockData(this.category.getRocksWithinWindow('#rockZone0', this.collection));
-	dataRow.userAction = action;
-	dataRow.userCorrect = this.currentStateSatisfiesCategory;
+	dataRow.trialNum = this.currentStimulus;
+
+	dataRow.stimIndex = this.stimuli[this.currentStimulus].stimulusNum;
+
+	dataRow.rocks = codifyUserRockData(this.category.getRocksWithinWindow('#rockZone0', this.collection));
+	dataRow.action = action;
+	dataRow.accuracy = this.currentStateSatisfiesCategory;
+	dataRow.reaction = Date.now() - this.t1;
 
 	console.log(dataRow);
 	this.events.data(dataRow);
-	// game.addRow(dataRow);
+
+	this.t1 = Date.now();
 }
 
 function codifyUserRockData(rocks) {

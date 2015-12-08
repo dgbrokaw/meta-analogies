@@ -1,0 +1,156 @@
+<!doctype html>
+
+<title>iAnalogy</title>
+
+<script src='d3.min.js'></script>
+<script src="FileSaver.js"></script>
+
+<script src="tools.js"></script>
+<script src="board.js"></script>
+
+<script src="game.js"></script>
+<script src="rock.js"></script>
+
+<script src="phases/phases.js"></script>
+<script src="phases/condition-phase.js"></script>
+<script src="phases/instructions-phase.js"></script>
+<script src="phases/interactive-phase.js"></script>
+<script src="phases/control-phase.js"></script>
+<script src="phases/test-phase.js"></script>
+
+<script src="categories/categories.js"></script>
+<script src="categories/sandwich.js"></script>
+
+<!-- control/test stimuli -->
+<script src="stimuli/stimuli.js"></script>
+<!-- interaction condition stuff -->
+<script src="setup.js"></script>
+
+<style>
+.noselect {
+	-webkit-user-select:none;
+}
+
+#instructions {
+	margin: 100px 30% 0 30%;
+	font-size: 14pt;
+}
+</style>
+
+<body>
+</body>
+
+<script>
+
+var trainingInstructions = {
+	type: 'message'
+, instructions: [
+		"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arrangements of objects that have certain properties; these arrangements are known as \"Togs.\" Your job is to figure out what properties are necessary to being a Tog."
+	, "On each training trial, you will see a bordered \'testing zone\' that contains an arrangement of blocks. By changing things about the arrangements, you can test to see what properties are necessary to being a Tog (instructions how to change arrangements will be on the following pages). When making your tests, the border of the testing zone gives you an important clue. When the border is green, the arrangement is a Tog; when it is red, it is NOT a Tog. By paying attention to the changes that cause the arrangement to come in and out of being a Tog, and trying lots of different changes, you will learn a lot about what makes a Tog."
+	, "You will be tested on your knowledge of Togs later, so make the most of each trial! There will be three different trials - you may go back and forth between them as much as you wish. When you are ready, click \"Next\" to learn how to change the arrangements."
+	]
+};
+
+var trainingInstructions2 = {
+	type: 'message'
+, instructions: [
+		"Today you will see arrangements of blocks created by the Pintox culture. The Pintox culture has a name for arrangements of objects that have certain properties; these arrangements are known as \"Togs.\" Your job is to figure out what properties are necessary to being a Tog."
+	, "On each training trial, you will see an arrangement of blocks. With each arrangement, you will need to decide if it IS or IS NOT a Tog. After making your decision, you will be given corrective feedback. By paying attention to the properties of arrangements that ARE and ARE NOT Togs, you can learn what properties are necessary to being a Tog. At first you won\'t be able to tell what makes a Tog, but before long you should become quite good."
+	, "You will be tested on your knowledge of Togs later, so make the most of each trial! When you are ready, click \"Next\" to continue."
+	]
+}
+
+var interactiveConditionTutorial = [
+	{ type: 'image'
+	, instructions: 'tutorialpics/pics/Slide1.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide2.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide3.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide4.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide5.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide6.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide7.png' }
+, { type: 'image'
+	, instructions: 'tutorialpics/pics/Slide8.png' }
+]
+
+var hint = {
+	type: 'message'
+, instructions: [
+		 "To get you started in your learning, here is a hint: A Tog is a thing that has special objects surrounding other objects that have something in common with them. When you are ready, click \"Next\" to begin training."
+	]
+}
+
+var testingInstructions = {
+	type: 'message'
+, instructions: [
+		"You will now see arrangements of blocks and it is your job to decide if each one is a Tog or not. Respond by clicking \"Yes\" or \"No\" to each arrangement."
+	]
+}
+
+var farewellMessage = {
+	type: 'message'
+, instructions: [
+		"Thank you for participating.  This experiment is over.  Please get the experimenter for the next activity."
+	]
+}
+
+var track1 = {
+	condition: 'condition1'
+
+, track: [
+		['instruction', trainingInstructions]
+	, ['instruction', interactiveConditionTutorial[0]]
+	, ['instruction', interactiveConditionTutorial[1]]
+	, ['instruction', interactiveConditionTutorial[2]]
+	, ['instruction', interactiveConditionTutorial[3]]
+	, ['instruction', interactiveConditionTutorial[4]]
+	, ['instruction', interactiveConditionTutorial[5]]
+	, ['instruction', interactiveConditionTutorial[6]]
+	, ['instruction', interactiveConditionTutorial[7]]
+	, ['instruction', hint]
+
+	, ['interaction', interactiveStimuli]
+
+	, ['instruction', testingInstructions]
+	, ['test', testStimuli]
+
+	, ['instruction', farewellMessage]
+	]
+};
+
+var track2 = {
+	condition: 'condition2'
+
+, track: [
+		['instruction', trainingInstructions2]
+	, ['instruction', hint]
+
+	, ['control', trainingStimuli]
+
+	, ['instruction', testingInstructions]
+	, ['test', testStimuli]
+
+	, ['instruction', farewellMessage]
+	]
+};
+
+var conditionPhase = new ConditionPhase();
+conditionPhase.events.on('end', function(settings) {
+	var ID = settings.subjectID;
+
+	var track;
+	if (settings.condition === '1') track = track1;
+	else track = track2;
+
+	var game = new Game(ID, track);
+	game.startGame();
+})
+
+conditionPhase.start();
+</script>

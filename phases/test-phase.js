@@ -17,6 +17,7 @@ TestPhase.defaultSettings = {
 
 , buttonHeight: 150
 , buttonWidth: 600
+, incorrectColor: 'rgb(112,112,112)'
 
 , button1Text: 'Not a Tog'
 , button2Text: 'Tog'
@@ -32,7 +33,7 @@ TestPhase.prototype.initSettings = function(settings) {
 }
 
 TestPhase.prototype.initRockSettings = function(stimuli) {
-	this.stimuli = stimuli.stimuli;
+	this.stimuli = stimuli;
 
 	var temp = this.settings;
 	temp.smallRockDimension = temp.baseRockDimension;
@@ -40,19 +41,6 @@ TestPhase.prototype.initRockSettings = function(stimuli) {
 	temp.largeRockDimension = temp.baseRockDimension * temp.largeSizeMultiplier;
 
 	this.collection = new RockCollection(this.settings);
-
-	if (this.settings.rockZone1ContentType === 'code') {
-		this.stimuli = this.stimuli.map(this.parseRockCode);
-	}
-
-	// for (var i=0; i<this.stimuli.length; i++) {
-	// 	var stimulus = this.stimuli[i].rocks;
-	// 	for (var j=0; j<stimulus.length; j++) {
-	// 		var rock = stimulus[j];
-	// 		rock.x += this.board.positions[0][1][0]; // [0][1] is the location of the rock zone it the board arrangement
-	// 		rock.y += this.board.positions[0][1][1];
-	// 	}
-	// }
 }
 
 TestPhase.prototype.start = function() {
@@ -61,18 +49,12 @@ TestPhase.prototype.start = function() {
 	this.setupNoButton();
 	this.setupYesButton();
 
-	this.currentStimulus = 0;
 	this.currentStateSatisfiesCategory = false;
 
-	this.stimuli = tools.shuffle(this.stimuli);
+	this.stimuli.shuffle()
 
-	if (this.settings.rockZone1ContentType === 'code') {
-		this.collection.extendCollection(this.stimuli[this.currentStimulus]);
-		this.setupRocks();
-	} else {
-		this.clearImage();
-		this.setupImage(this.board.positions[0][1], this.stimuli[this.currentStimulus]);
-	}
+	this.t1 = Date.now();
+	this.setupImage(this.board.positions[0][1], this.stimuli.getNextStimulus().file);
 
 	this.events.start();
 }
@@ -84,7 +66,7 @@ TestPhase.prototype.setupNoButton = function() {
 }
 
 TestPhase.prototype.clickNo = function() {
-	this.responseGiven("no");
+	this.responseGiven(false);
 }
 
 TestPhase.prototype.setupYesButton = function() {
@@ -94,59 +76,18 @@ TestPhase.prototype.setupYesButton = function() {
 }
 
 TestPhase.prototype.clickYes = function() {
-	this.responseGiven("yes");
-}
-
-TestPhase.prototype.createPhaseTwoRockGroupSelection = function(rock) {
-	var board = d3.select('#board');
-	var d = rock.getData();
-	var rockGroup = board.append('g')
-										.datum(d)
-										.attr('id', rock.getID()+'group');
-	return rockGroup;
-}
-
-TestPhase.prototype.createPhaseTwoRockSelection = function(rock, group) {
-	var phase = this;
-	if (!rock.getData().w) {
-		console.log(rock.getData());
-	}
-	var r = group.append('rect')
-						.attr('id', rock.getID())
-						.attr('x', function(d) { return d.x })
-						.attr('y', function(d) { return d.y })
-						.attr('width', function(d) { return d.w })
-						.attr('height', function(d) { return d.h })
-						.style('fill', function(d) { return phase.settings.rockColors[d.c] })
-						.attr({'stroke-width': 3, 'stroke': (rock.borderColor ? rock.borderColor : 'black'), 'opacity': 1})
-		    		.style('fill-opacity', 0.75);
-  return r;
-}
-
-TestPhase.prototype.setupRocks = function() {
-	var rocks = this.collection.getRocks();
-	for (var i=0; i<rocks.length; i++) {
-		var rock = rocks[i];
-		var groupSelection = this.createPhaseTwoRockGroupSelection(rock);
-		var rockSelection = this.createPhaseTwoRockSelection(rock, groupSelection);
-		rock.setGroupSelection(groupSelection);
-		rock.setRockSelection(rockSelection);
-	}
+	this.responseGiven(true);
 }
 
 TestPhase.prototype.responseGiven = function(response) {
+	this.t2 = Date.now();
 	var phase = this;
 	this.collectData(response);
-	phase.currentStimulus++;
-	phase.collection.clearCollection();
-	if (phase.currentStimulus<phase.stimuli.length) {
-		if (this.settings.rockZone1ContentType === 'code') {
-			phase.collection.extendCollection(phase.stimuli[phase.currentStimulus]);
-			phase.setupRocks();
-		} else {
-			this.clearImage();
-			this.setupImage(this.board.positions[0][1], this.stimuli[this.currentStimulus]);
-		}
+	var nextStimulus = this.stimuli.getNextStimulus();
+	if (nextStimulus) {
+		this.t1 = Date.now();
+		this.clearImage();
+		this.setupImage(this.board.positions[0][1], nextStimulus.file);
 	} else {
 		phase.teardown();
 		phase.events.end(phase.phaseNum);
@@ -154,18 +95,22 @@ TestPhase.prototype.responseGiven = function(response) {
 }
 
 TestPhase.prototype.collectData = function(response) {
-	var d = new Date();
 	var dataRow = new Row();
 
+	var currentStimulus = this.stimuli.getCurrentStimulus();
+
 	// dataRow.subjectID = game.getSubjectID();
-	dataRow.date = d.toDateString();
-	dataRow.t = d.toTimeString();
 	dataRow.phase = 'test';
-	dataRow.phaseNum = this.phaseNum;
-	dataRow.stimulusNum = this.stimuli[this.currentStimulus].stimulusNum;
-	dataRow.userRocks = null;
-	dataRow.userAction = response;
-	dataRow.userCorrect = response===this.stimuli[this.currentStimulus].answer;
+	dataRow.trialNum = this.stimuli.currentStimulus;
+
+	for (var descriptor in currentStimulus.description) {
+		dataRow[descriptor] = currentStimulus.description[descriptor];
+	}
+	dataRow.stimInformation = currentStimulus.code;
+
+	dataRow.response = response;
+	dataRow.accuracy = response === currentStimulus.answer ? 1 : 0;
+	dataRow.reaction = this.t2 - this.t1;
 
 	console.log(dataRow);
 	this.events.data(dataRow);

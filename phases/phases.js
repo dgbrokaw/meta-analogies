@@ -55,8 +55,10 @@ var asGamePhase = function() {
 			.attr('height', this.board.settings.rockZoneHeight).append('svg:image')
 			.attr('x', '3px') // should be half the stroke width
 			.attr('y', '3px')
-			.attr('width', '50px')
-			.attr('height', '50px')
+			.attr('width', '550px')
+			.attr('height', '550px')
+			// .attr('width', '50px')
+			// .attr('height', '50px')
 			.attr('xlink:href', stimulus);
 	}
 

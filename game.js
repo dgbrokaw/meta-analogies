@@ -44,15 +44,25 @@ Game.prototype.addRow = function(data) {
 	this.record.push(data);
 }
 
+// Game.prototype.phaseEnd = function(phaseNum) {
+//   if (phaseNum+1 < this.phases.length) {
+//     this.phases[phaseNum+1].start();
+//   } else {
+//     this.saveData(this.record);
+//   }
+// }
+
 Game.prototype.phaseEnd = function(phaseNum) {
+  if (this.record.length) {
+    this.saveData(this.record, phaseNum);
+    this.record = [];
+  }
   if (phaseNum+1 < this.phases.length) {
     this.phases[phaseNum+1].start();
-  } else {
-    this.saveData(this.record);
   }
 }
 
-Game.prototype.saveData = function(data) {
+Game.prototype.saveData = function(data, phaseNum) {
   // using the FileSaver.js to save the game to file
   // (should contain all user and test data)
 
@@ -61,6 +71,7 @@ Game.prototype.saveData = function(data) {
   var fileName = ''
     + (new Date()).toDateString().replace(/ /g, "-")
     + 'subject' + this.getSubjectID()
+    + 'phase' + phaseNum
     + '.csv';
   saveAs(blob, fileName);
 }
@@ -74,16 +85,16 @@ Game.prototype.deleteLastRow = function() {
 }
 
 var Row = function() {
-  this.subjectID;
+  // this.subjectID;
 
-  this.date;
-  this.t;
+  // this.date;
+  // this.t;
 
-  this.stimulusNum;
-  this.stimulus;
-  this.userRocks;
-  this.userAction;
-  this.categorySatisfied;
+  // this.stimulusNum;
+  // this.stimulus;
+  // this.userRocks;
+  // this.userAction;
+  // this.categorySatisfied;
 }
 
 function uid() {
