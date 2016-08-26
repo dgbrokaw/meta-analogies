@@ -1,5 +1,7 @@
 # meta-analogies
 
+[![Join the chat at https://gitter.im/iAnalogy/Lobby](https://badges.gitter.im/iAnalogy/Lobby.svg)](https://gitter.im/iAnalogy/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 "iAnalogy"
 
 The experiment version is in the branch "variant-1."
