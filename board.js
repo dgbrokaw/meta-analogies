@@ -204,8 +204,14 @@ Board.prototype.setupButton = function(position, IDIndex) {
 		.style({fill: this.settings.activeButtonColor})
 		.attr({cx: position[0]+(this.settings.buttonWidth/2), cy: position[1]+(this.settings.buttonHeight/2), rx: this.settings.buttonWidth/2, ry: this.settings.buttonHeight/2});
 	button.append('text')
-		.style({fill: 'rgb(240,240,240)', stroke: 'none', 'font-family': 'sans-serif', 'font-style':'bold', 'font-size': 32})
-		.attr({x: position[0]+this.settings.buttonWidth/4, y: position[1]+this.settings.buttonHeight*3/5})
+		.style({ 'fill': 'rgb(240,240,240)'
+		       , 'stroke': 'none'
+					 , 'font-family': 'sans-serif'
+					 , 'font-style': 'bold'
+					 , 'font-size': 32
+					 , 'text-anchor': 'middle'
+					 , 'alignment-baseline': 'central' })
+		.attr({x: position[0]+this.settings.buttonWidth/2, y: position[1]+this.settings.buttonHeight/2})
 		.text("Button");
 }
 

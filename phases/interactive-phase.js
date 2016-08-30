@@ -1,4 +1,4 @@
-// The InteractionPhase is a board containing one (or two) workspaces that
+// The InteractionPhase is a board containing a workspace that
 // will react to whether the contents of that workspace contains elements
 // that are arranged according to a specified ruleset.  The elements are rocks
 // that are initialized in the reactive workspace as well as others outside of
@@ -16,25 +16,29 @@ var InteractionPhase = function(stimuli, settings) {
 
 	this.category = new categories[stimuli.category](this.settings);
 }
-asGamePhase.call(InteractionPhase);
 
+asGamePhase.call(InteractionPhase);
 phases['interaction'] = InteractionPhase;
 
 InteractionPhase.defaultSettings = {
-	boardArrangement: [ ['margin']
-										,	['bench', 'rockZone']
-									 	, ['button', 'margin', 'button', 'margin', 'button'] ]
+	boardArrangement: [ ['margin', 'margin'] // text feedback is placed in the position of the first margin
+	                  , ['margin', 'margin'] // text feedback is placed in the position of the first margin
+										,	['bench', 'rockZone', 'bench', 'bench', 'bench'] // space on the right is for guidance text
+										, ['button', 'margin', 'margin'] ] // space on the right is to push the button to the left
+
+	// simple arrangement:
 	// boardArrangement: [ ['bench', 'rockZone']
 	// 								 	, ['button', 'button'] ]
 
-, rockZone1ContentType: 'code' // 'png' // this setting does nothing currently, it's always code
+, rockZone1ContentType: 'code' // 'png' // this setting does nothing currently, it's always 'code'
 
-, correctTextResponse: 'This is a Tog!'
-, incorrectTextResponse: 'This is not a Tog.'
+, correctTextResponse: ['The display now contains a togging situation!', 'Can you find a new way to break the togging situation?']
+, incorrectTextResponse: ['The display now does NOT contain a togging situation...', 'Can you find a new way to make a togging situation?']
 
-, button0Text: 'Back'
-, button1Text: 'Refresh'
-, button2Text: 'Next'
+, buttonWidth: 600
+, buttonText: 'new'
+
+, timeLimit: 7*60
 }
 
 InteractionPhase.prototype.initSettings = function(settings) {
@@ -60,12 +64,11 @@ InteractionPhase.prototype.initRockSettings = function(stimuli) {
 	// this.stimuli = this.stimuli.map(this.parseRockCode);
 
 	for (var i=0; i<this.stimuli.length; i++) {
-		// var stimulus = this.stimuli[i];
 		var stimulus = this.stimuli[i].rocks;
 		for (var j=0; j<stimulus.length; j++) {
 			var rock = stimulus[j];
-			rock.x += this.board.positions[1][1][0]; // [1][1] is the location of the rock zone it the board arrangement
-			rock.y += this.board.positions[1][1][1];
+			rock.x += this.board.positions[2][1][0]; // [2][1] is the location of the rock zone it the board arrangement
+			rock.y += this.board.positions[2][1][1];
 		}
 	}
 
@@ -75,37 +78,32 @@ InteractionPhase.prototype.initRockSettings = function(stimuli) {
 InteractionPhase.prototype.start = function(stimuli, settings) {
 	this.board.initElements();
 
-	this.setupBackButton();
-	this.setupRefreshButton();
-	this.setupNextButton();
-
 	this.currentStimulus = 0;
 	this.currentStateSatisfiesCategory = false;
 
 	this.stimuli = shuffle(this.stimuli);
-	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
 	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
+
+	this.setupNewButton();
+	this.setupTimer();
+	this.setupGuidanceText();
 
 	this.t1 = Date.now();
 	this.events.start();
 }
 
-InteractionPhase.prototype.setupBackButton = function() {
+InteractionPhase.prototype.setupNewButton = function() {
 	var button = d3.select('#button0');
-	button.select('text').text(this.settings.button0Text);
-	button.on('click', this.clickBack.bind(this));
+	button.select('text').text(this.settings.buttonText);
+	button.on('click', this.clickNew.bind(this));
 }
 
-InteractionPhase.prototype.clickBack = function() {
-	if (this.currentStimulus <= 0) return;
-	if (this.currentStimulus === this.stimuli.length-1)
-		d3.select('#button2').select('text').text('Next')
-	this.collectPhaseOneData('back');
+InteractionPhase.prototype.clickNew = function() {
+	this.collectPhaseOneData('new');
 	this.collection.clearCollection();
-	this.currentStimulus--;
-	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
+	this.currentStimulus = (this.currentStimulus + 1) % this.stimuli.length;
 	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
@@ -113,54 +111,47 @@ InteractionPhase.prototype.clickBack = function() {
 	this.collectPhaseOneData('start');
 }
 
-InteractionPhase.prototype.setupRefreshButton = function() {
-	var button = d3.select('#button1');
-	button.select('text').text(this.settings.button1Text);
-	button.on('click', this.clickRefresh.bind(this));
+InteractionPhase.prototype.setupTimer = function() {
+	this.timeRemaining = this.settings.timeLimit;
+
+	var timer = d3.select('#board').append('text')
+		.attr('id', 'timer')
+		.style({ 'stroke': 'none'
+	         , 'font-family': 'sans-serif'
+	         , 'font-style': 'bold'
+	         , 'font-size': 16 })
+		.attr({x: 8, y: 20})
+		.text('Time Remaining: ' + this.formatTime(this.timeRemaining));
+
+	var timer_interval_id = setInterval((function() {
+		timer.text('Time Remaining: ' + this.formatTime(this.timeRemaining));
+		this.timeRemaining--;
+		if (this.timeRemaining <= 0) this.endPhaseOne()
+	}).bind(this), 1000);
 }
 
-InteractionPhase.prototype.clickRefresh = function() {
-	this.collectPhaseOneData('refresh')
-	this.collection.clearCollection();
-	// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
-	this.collection.extendCollection(this.benchRocks);
-	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
-	this.setupRocks();
-	this.displayUserFeedback();
+InteractionPhase.prototype.formatTime = function(tot_secs) {
+	var mins = ~~(tot_secs / 60)
+    , secs = tot_secs % 60;
+  return "" + mins + ":" + (secs < 10 ? "0" : "") + secs;
 }
 
-InteractionPhase.prototype.setupNextButton = function() {
-	var button = d3.select('#button2');
-	button.select('text').text(this.settings.button2Text);
-	button.on('click', this.clickNext.bind(this));
-}
+InteractionPhase.prototype.setupGuidanceText = function() {
+	var x = this.board.positions[2][4][0];
 
-InteractionPhase.prototype.clickNext = function() {
-	// if (this.currentStateSatisfiesCategory && this.currentStimulus<trainStimuli.length-1) {
-	if (this.currentStimulus<this.stimuli.length-1) {
-		this.collectPhaseOneData('next');
-		this.collection.clearCollection();
-		this.currentStimulus++;
-		// this.collection.extendCollection(this.stimuli[this.currentStimulus]);
-		this.collection.extendCollection(this.benchRocks);
-		this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
-		this.setupRocks();
-		this.displayUserFeedback();
-		this.collectPhaseOneData('start');
+	var text = d3.select('#board').append('text')
+		.attr({x: this.board.positions[2][4][0], y: this.board.positions[2][4][1]})
+		.style({'font-size': '100%', 'stroke': 'none', 'font-family': 'sans-serif'})
 
-		if (this.currentStimulus === this.stimuli.length-1) {
-			 d3.select('#button2').select('text').text('Done');
-		}
-	// } else if (this.currentStateSatisfiesCategory) {
-	} else {
-		var confirmed = confirm('Are you sure?');
-		if (confirmed) {
-			this.collectPhaseOneData('next');
-			this.collection.clearCollection();
-			this.teardown();
-			this.events.end(this.phaseNum);
-		}
-	}
+	text.append('tspan').attr({x: x-80, dy: 0}).style({'text-decoration': 'underline', 'font-weight': 'bold', 'text-anchor': 'middle', 'font-size': '64px'}).text('Ways to explore');
+	text.append('tspan').attr({x: x-320, dy: 100}).style({'text-anchor': 'start', 'font-size': '32px'}).text('MOVE A BLOCK (click and drag a block)');
+	text.append('tspan').attr({x: x-320, dy: 80}).style({'text-anchor': 'start', 'font-size': '32px'}).text('CHANGE A COLOR (double-click a block)');
+	text.append('tspan').attr({x: x-320, dy: 80}).style({'text-anchor': 'start', 'font-size': '32px'}).text('CHANGE A SIZE (stretch/shrink a block by');
+	text.append('tspan').attr({x: x-300, dy: 40}).style({'text-anchor': 'start', 'font-size': '32px'}).text('dragging from lower right corner)');
+	text.append('tspan').attr({x: x-320, dy: 80}).style({'text-anchor': 'start', 'font-size': '32px'}).text('ADD/REMOVE (drag one or more blocks');
+	text.append('tspan').attr({x: x-300, dy: 40}).style({'text-anchor': 'start', 'font-size': '32px'}).text('in/out of the exploration area)');
+	text.append('tspan').attr({x: x-320, dy: 80}).style({'text-anchor': 'start', 'font-size': '32px'}).text('NEW (click button to get a new Tog to');
+	text.append('tspan').attr({x: x-300, dy: 40}).style({'text-anchor': 'start', 'font-size': '32px'}).text('explore)');
 }
 
 InteractionPhase.prototype.setupRockDrag = function() {
@@ -192,9 +183,6 @@ InteractionPhase.prototype.createRockGroupSelection = function(rock) {
 
 InteractionPhase.prototype.createRockSelection = function(rock, group, disallowDrag) {
 	var phase = this;
-	if (!rock.getData().w) {
-		console.log(rock.getData())
-	}
 	var r = group.append('rect')
 						.attr('id', rock.getID())
 						.attr('x', function(d) { return d.x })
@@ -241,18 +229,6 @@ InteractionPhase.prototype.setupRocks = function() {
 	}
 	this.displayUserFeedback();
 }
-
-// InteractionPhase.prototype.setupStimuli() {
-// 	var rocks = controlCollection.getRocks();
-// 	for (var i=0; i<rocks.length; i++) {
-// 		var rock = rocks[i];
-// 		var groupSelection = createRockGroupSelection(rock);
-// 		var rockSelection = createRockSelection(rock, groupSelection, true);
-// 		rock.setGroupSelection(groupSelection);
-// 		rock.setRockSelection(rockSelection);
-// 	}
-// 	displayUserFeedback();
-// }
 
 InteractionPhase.prototype.dblclickRock = function(d) {
 	var rock = this.collection.getRockByID(d.id);
@@ -527,32 +503,37 @@ InteractionPhase.prototype.resizeBoxInRangeOfOtherSize = function() {
 }
 
 InteractionPhase.prototype.displayUserFeedback = function() {
-	this.checkUserWindow();
+	var text_line1_position = [this.board.positions[0][0][0], this.board.positions[0][0][1]]
+	  , text_line2_position = [this.board.positions[1][0][0], this.board.positions[1][0][1]];
+
+	if (this.category.windowSatisfiesCategory('#rockZone0', this.collection)) {
+		this.currentStateSatisfiesCategory = true;
+
+		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.correctColor);
+		this.board.setButtonColor('#button1', this.board.settings.activeButtonColor);
+
+		d3.selectAll('.feedback').remove();
+		this.displayTextFeedback(this.settings.correctTextResponse[0], text_line1_position);
+		this.displayTextFeedback(this.settings.correctTextResponse[1], text_line2_position);
+	} else {
+		this.currentStateSatisfiesCategory = false;
+
+		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.incorrectColor);
+		this.board.setButtonColor('#button1', this.board.settings.inactiveButtonColor);
+
+		d3.selectAll('.feedback').remove();
+		this.displayTextFeedback(this.settings.incorrectTextResponse[0], text_line1_position);
+		this.displayTextFeedback(this.settings.incorrectTextResponse[1], text_line2_position);
+	}
 }
 
-InteractionPhase.prototype.checkUserWindow = function() {
-	if (this.category.windowSatisfiesCategory('#rockZone0', this.collection)) {
-		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.correctColor)
-		d3.select('#feedback').remove();
-		d3.select('#board').insert('text', '#rockZone0')
-			.attr('id', 'feedback')
-			.attr('x', this.board.positions[0][0][0])
-			.attr('y', this.board.positions[0][0][1])
-			.text(this.settings.correctTextResponse)
-			.style({'font-size': '200%'});
-		this.currentStateSatisfiesCategory = true;
-		this.board.setButtonColor('#button1', this.board.settings.activeButtonColor);
-	} else {
-		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.incorrectColor);
-		d3.select('#feedback').remove();
-		d3.select('#board').insert('text', '#rockZone0')
-			.attr('id', 'feedback')
-			.attr('x', this.board.positions[0][0][0])
-			.attr('y', this.board.positions[0][0][1])
-			.text(this.settings.incorrectTextResponse);
-		this.currentStateSatisfiesCategory = false;
-		this.board.setButtonColor('#button1', this.board.settings.inactiveButtonColor);
-	}
+InteractionPhase.prototype.displayTextFeedback = function(text, position) {
+	d3.select('#board').insert('text', '#rockZone0')
+		.classed('feedback', true)
+		.attr('x', position[0])
+		.attr('y', position[1])
+		.text(text)
+		.style({'font-size': '200%', 'text-anchor': 'middle', 'stroke': 'none', 'font-family': 'sans-serif'});
 }
 
 InteractionPhase.prototype.collectPhaseOneData = function(action) {
@@ -569,11 +550,18 @@ InteractionPhase.prototype.collectPhaseOneData = function(action) {
 	dataRow.action = action;
 	dataRow.accuracy = this.currentStateSatisfiesCategory;
 	dataRow.reaction = Date.now() - this.t1;
+	dataRow.timeRemaining = this.timeRemaining;
 
-	console.log(dataRow);
+	// console.log(dataRow);
 	this.events.data(dataRow);
 
 	this.t1 = Date.now();
+}
+
+InteractionPhase.prototype.endPhaseOne = function() {
+	this.collection.clearCollection();
+	this.teardown();
+	this.events.end(this.phaseNum);
 }
 
 function codifyUserRockData(rocks) {
