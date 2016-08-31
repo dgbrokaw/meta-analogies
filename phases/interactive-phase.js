@@ -38,7 +38,7 @@ InteractionPhase.defaultSettings = {
 , buttonWidth: 600
 , buttonText: 'new'
 
-, timeLimit: 0.5*60
+, timeLimit: 7*60
 }
 
 InteractionPhase.prototype.initSettings = function(settings) {
