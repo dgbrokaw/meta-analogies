@@ -38,7 +38,7 @@ InteractionPhase.defaultSettings = {
 , buttonWidth: 600
 , buttonText: 'new'
 
-, timeLimit: 7*60
+, timeLimit: 0.5*60
 }
 
 InteractionPhase.prototype.initSettings = function(settings) {
@@ -90,6 +90,7 @@ InteractionPhase.prototype.start = function(stimuli, settings) {
 	this.setupTimer();
 	this.setupGuidanceText();
 
+	this.dataQueue = [];
 	this.t1 = Date.now();
 	this.events.start();
 }
@@ -539,6 +540,29 @@ InteractionPhase.prototype.displayTextFeedback = function(text, position) {
 		.style({'font-size': '200%', 'text-anchor': 'middle', 'stroke': 'none', 'font-family': 'sans-serif'});
 }
 
+// InteractionPhase.prototype.collectPhaseOneData = function(action) {
+// 	var dataRow = new Row();
+//
+// 	// dataRow.subjectID = game.getSubjectID();
+//
+// 	dataRow.phase = 'interactive';
+// 	dataRow.trialNum = this.currentStimulus;
+//
+// 	dataRow.stimIndex = this.stimuli[this.currentStimulus].stimulusNum;
+//
+// 	dataRow.rocks = codifyUserRockData(this.category.getRocksWithinWindow('#rockZone0', this.collection));
+// 	dataRow.action = action;
+// 	dataRow.accuracy = this.currentStateSatisfiesCategory;
+// 	dataRow.reaction = Date.now() - this.t1;
+// 	dataRow.timeRemaining = this.timeRemaining;
+// 	console.log(dataRow.reaction);
+//
+// 	// console.log(dataRow);
+// 	this.events.data(dataRow);
+//
+// 	this.t1 = Date.now();
+// }
+
 InteractionPhase.prototype.collectPhaseOneData = function(action) {
 	var dataRow = new Row();
 
@@ -556,12 +580,32 @@ InteractionPhase.prototype.collectPhaseOneData = function(action) {
 	dataRow.timeRemaining = this.timeRemaining;
 
 	// console.log(dataRow);
-	this.events.data(dataRow);
+	// this.events.data(dataRow);
+
+	this.dataQueue.push(dataRow);
 
 	this.t1 = Date.now();
 }
 
+InteractionPhase.prototype.collapseDoubleClicks = function(data) {
+	var unqueued = [];
+	for (var i=0; i<data.length; i++) {
+		var datum = data[i];
+		if (datum.action === 'color') {
+			var drag2 = unqueued.pop(), drag1 = unqueued.pop();
+			datum.reaction += drag1.reaction + drag2.reaction;
+		}
+		unqueued.push(datum);
+	}
+	return unqueued;
+}
+
+InteractionPhase.prototype.exportData = function(data) {
+	data.forEach(function(datum) { this.events.data(datum) }, this);
+}
+
 InteractionPhase.prototype.endPhaseOne = function() {
+	this.exportData(this.collapseDoubleClicks(this.dataQueue));
 	this.collection.clearCollection();
 	this.teardown();
 	this.events.end(this.phaseNum);
