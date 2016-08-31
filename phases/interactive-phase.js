@@ -126,7 +126,10 @@ InteractionPhase.prototype.setupTimer = function() {
 	var timer_interval_id = setInterval((function() {
 		timer.text('Time Remaining: ' + this.formatTime(this.timeRemaining));
 		this.timeRemaining--;
-		if (this.timeRemaining <= 0) this.endPhaseOne()
+		if (this.timeRemaining <= 0) {
+			this.endPhaseOne()
+			clearInterval(timer_interval_id);
+		}
 	}).bind(this), 1000);
 }
 

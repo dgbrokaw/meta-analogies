@@ -46,8 +46,7 @@ SandwichCategory.prototype.rockSatisfiesSandwichCategory = function(rockIDX) {
 			   ,B_box = getCornersOf(B);
 			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box, this.settings.smallRockDimension) && notOnExtremeDiagonal(A, B) && A.borderColor && B.borderColor && A.borderColor===B.borderColor) {
 				var rocksInRegion = this.findRocksInRegion(A, B, A_box, B_box);
-				if (rocksInRegion.length>0)
-					satisfies = this.containsSandwich(A, rocksInRegion, B);
+				if (rocksInRegion.length>0) return true; // satisfies = this.containsSandwich(A, rocksInRegion, B);
 			}
 		}
 	}
@@ -183,12 +182,14 @@ function CIsInRegionOfAAndB(C, A_box, B_box) {
 	   ,lineSet2 = getBottomLeftTopRightLineSet(A_box, B_box);
 	var lineSet;
 	var cCenter = getCenterOf(C);
+	var horizontal_parallel = false;
 	if (A_box.topLeft.x===B_box.topLeft.x || A_box.topLeft.y===B_box.topLeft.y) {
 		lineSet = lineSet1;
+		if (A_box.topLeft.y===B_box.topLeft.y) horizontal_parallel = true;
 	} else {
 		lineSet = getWidestArea(lineSet1, lineSet2);
 	}
-	return inBetween(cCenter, lineSet);
+	return inBetween(cCenter, lineSet, horizontal_parallel);
 }
 
 function CIsBetweenAAndB(C, A_box, B_box) {
@@ -196,13 +197,16 @@ function CIsBetweenAAndB(C, A_box, B_box) {
 	   ,lineSet2 = getBottomLeftTopRightLineSet(A_box, B_box);
 	var lineSet;
 	var cCenter = getCenterOf(C);
+	var horizontal_parallel = false;
 	if (A_box.topLeft.x===B_box.topLeft.x || A_box.topLeft.y===B_box.topLeft.y) {
 		lineSet = lineSet1;
+		if (A_box.topLeft.y===B_box.topLeft.y) horizontal_parallel = true;
 	} else {
 		lineSet = getWidestArea(lineSet1, lineSet2);
 	}
-	return inBetween(cCenter, lineSet) && ((A_box.topRight.x < cCenter.x && cCenter.x < B_box.topLeft.x)
-		                                     || (A_box.bottomLeft.y < cCenter.y && cCenter.y < B_box.topLeft.y));
+
+	return inBetween(cCenter, lineSet, horizontal_parallel) && ( (A_box.topRight.x < cCenter.x && cCenter.x < B_box.topLeft.x)
+		                                                        || (A_box.bottomLeft.y < cCenter.y && cCenter.y < B_box.topLeft.y) );
 }
 
 function CSharesAPropertyWithA(C, A) {
@@ -226,10 +230,10 @@ function getWidestArea(lines1, lines2) {
 	return lines2;
 }
 
-function inBetween(P, lines) {
+function inBetween(P, lines, horizontal_parallel) {
 	var side1 = getSign(getSide(P, lines.left))
 	    side2 = getSign(getSide(P, lines.right));
-	return side1===-1 && side2===1;
+	return horizontal_parallel ? side1===1 && side2===-1 : side1===-1 && side2===1;
 }
 
 function getSide(P, line) {
