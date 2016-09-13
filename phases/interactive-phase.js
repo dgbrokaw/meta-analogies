@@ -21,10 +21,9 @@ asGamePhase.call(InteractionPhase);
 phases['interaction'] = InteractionPhase;
 
 InteractionPhase.defaultSettings = {
-	boardArrangement: [ ['margin', 'margin'] // text feedback is placed in the position of the first margin
-	                  , ['margin', 'margin'] // text feedback is placed in the position of the first margin
-										,	['bench', 'rockZone', 'bench', 'bench', 'bench'] // space on the right is for guidance text
-										, ['button', 'margin', 'margin'] ] // space on the right is to push the button to the left
+	boardArrangement: [ ['margin', 'margin']
+										,	['bench', 'rockZone', 'margin', 'bench']
+										, ['button'] ]
 
 	// simple arrangement:
 	// boardArrangement: [ ['bench', 'rockZone']
@@ -67,8 +66,8 @@ InteractionPhase.prototype.initRockSettings = function(stimuli) {
 		var stimulus = this.stimuli[i].rocks;
 		for (var j=0; j<stimulus.length; j++) {
 			var rock = stimulus[j];
-			rock.x += this.board.positions[2][1][0]; // [2][1] is the location of the rock zone it the board arrangement
-			rock.y += this.board.positions[2][1][1];
+			rock.x += this.board.positions[1][1][0]; // [2][1] is the location of the rock zone it the board arrangement
+			rock.y += this.board.positions[1][1][1];
 		}
 	}
 
@@ -141,10 +140,10 @@ InteractionPhase.prototype.formatTime = function(tot_secs) {
 }
 
 InteractionPhase.prototype.setupGuidanceText = function() {
-	var x = this.board.positions[2][4][0];
+	var x = this.board.positions[1][3][0];
 
 	var text = d3.select('#board').append('text')
-		.attr({x: this.board.positions[2][4][0], y: this.board.positions[2][4][1]})
+		.attr({x: this.board.positions[1][3][0], y: this.board.positions[1][3][1]})
 		.style({'font-size': '100%', 'stroke': 'none', 'font-family': 'sans-serif'})
 
 	text.append('tspan').attr({x: x-80, dy: 0}).style({'text-decoration': 'underline', 'font-weight': 'bold', 'text-anchor': 'middle', 'font-size': '64px'}).text('Ways to explore');
@@ -156,6 +155,24 @@ InteractionPhase.prototype.setupGuidanceText = function() {
 	text.append('tspan').attr({x: x-300, dy: 40}).style({'text-anchor': 'start', 'font-size': '32px'}).text('in/out of the exploration area)');
 	text.append('tspan').attr({x: x-320, dy: 80}).style({'text-anchor': 'start', 'font-size': '32px'}).text('NEW (click button to get a new Tog to');
 	text.append('tspan').attr({x: x-300, dy: 40}).style({'text-anchor': 'start', 'font-size': '32px'}).text('explore)');
+}
+
+InteractionPhase.prototype.setupGuidanceText = function() {
+	var x = this.board.positions[1][3][0];
+
+	var text = d3.select('#board').append('text')
+		.attr({x: this.board.positions[1][3][0], y: this.board.positions[1][3][1] + 100})
+		.style({'font-size': '50%', 'stroke': 'none', 'font-family': 'sans-serif'})
+
+	text.append('tspan').attr({x: x, dy: 0}).style({'text-decoration': 'underline', 'font-weight': 'bold', 'text-anchor': 'start', 'font-size': '32px'}).text('Ways to explore');
+	text.append('tspan').attr({x: x, dy: 60}).style({'text-anchor': 'start', 'font-size': '16px'}).text('MOVE A BLOCK (click and drag a block)');
+	text.append('tspan').attr({x: x, dy: 40}).style({'text-anchor': 'start', 'font-size': '16px'}).text('CHANGE A COLOR (double-click a block)');
+	text.append('tspan').attr({x: x, dy: 40}).style({'text-anchor': 'start', 'font-size': '16px'}).text('CHANGE A SIZE (stretch/shrink a block by');
+	text.append('tspan').attr({x: x, dy: 25}).style({'text-anchor': 'start', 'font-size': '16px'}).text('dragging from lower right corner)');
+	text.append('tspan').attr({x: x, dy: 40}).style({'text-anchor': 'start', 'font-size': '16px'}).text('ADD/REMOVE (drag one or more blocks');
+	text.append('tspan').attr({x: x, dy: 25}).style({'text-anchor': 'start', 'font-size': '16px'}).text('in/out of the exploration area)');
+	text.append('tspan').attr({x: x, dy: 40}).style({'text-anchor': 'start', 'font-size': '16px'}).text('NEW (click button to get a new Tog to');
+	text.append('tspan').attr({x: x, dy: 25}).style({'text-anchor': 'start', 'font-size': '16px'}).text('explore)');
 }
 
 InteractionPhase.prototype.setupRockDrag = function() {
@@ -507,8 +524,8 @@ InteractionPhase.prototype.resizeBoxInRangeOfOtherSize = function() {
 }
 
 InteractionPhase.prototype.displayUserFeedback = function() {
-	var text_line1_position = [this.board.positions[0][0][0], this.board.positions[0][0][1]]
-	  , text_line2_position = [this.board.positions[1][0][0], this.board.positions[1][0][1]];
+	var text_line1_position = [600, 50] //[this.board.positions[0][0][0], this.board.positions[0][0][1]]
+	  , text_line2_position = [600, 100]; //[this.board.positions[1][0][0], this.board.positions[1][0][1]];
 
 	if (this.category.windowSatisfiesCategory('#rockZone0', this.collection)) {
 		this.currentStateSatisfiesCategory = true;
