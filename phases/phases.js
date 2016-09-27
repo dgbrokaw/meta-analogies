@@ -70,4 +70,28 @@ var asGamePhase = function() {
 		d3.select('#board').remove();
 	}
 
+	this.prototype.getRocksWithinWindow = function(rockZoneID, collection) {
+		var allRocks = collection.getRocks();
+		var rocksWithinWindow = [];
+		var windowRect = {};
+		var rockZone = d3.select(rockZoneID);
+		windowRect.x1 = rockZone.attr('x'), windowRect.y1 = rockZone.attr('y')
+	 ,windowRect.x2 = windowRect.x1+rockZone.attr('width'), windowRect.y2 = windowRect.y1+rockZone.attr('height');
+		for (var i=0; i<allRocks.length; i++) {
+			var rock = allRocks[i], rockRect = {};
+			rockRect.x1 = rock.x, rockRect.y1 = rock.y, rockRect.x2 = rock.x+rock.dimension, rockRect.y2 = rock.y+rock.dimension;
+			if (this.rockRectIsWithinWindowRect(rockRect, windowRect)) {
+				rocksWithinWindow.push(rock);
+			}
+		}
+		return rocksWithinWindow;
+	}
+
+	this.prototype.rockRectIsWithinWindowRect = function(rockRect, windowRect) {
+		return (windowRect.x1<rockRect.x1
+				 && windowRect.y1<rockRect.y1
+				 && rockRect.x2<windowRect.x2
+				 && rockRect.y2<windowRect.y2);
+	}
+
 }

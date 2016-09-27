@@ -37,7 +37,7 @@ InteractionPhase.defaultSettings = {
 , buttonWidth: 600
 , buttonText: 'new'
 
-, timeLimit: 7*60
+, timeLimit: 0.5*60
 }
 
 InteractionPhase.prototype.initSettings = function(settings) {
@@ -84,6 +84,7 @@ InteractionPhase.prototype.start = function(stimuli, settings) {
 	this.collection.extendCollection(this.benchRocks);
 	this.collection.extendCollection(this.stimuli[this.currentStimulus].rocks);
 	this.setupRocks();
+	this.activeRockCount = this.getRocksWithinWindow('#rockZone0', this.collection).length;
 
 	this.setupNewButton();
 	this.setupTimer();
@@ -271,6 +272,7 @@ InteractionPhase.prototype.rockDragstart = function(d) {
 }
 
 InteractionPhase.prototype.rockDragmove = function(d) {
+	var oldActiveRockCount = this.activeRockCount;
 	if (this.firstUpdate) {
   	firstUpdate = false;
   	d.c = this.draggedRock.color;
@@ -284,7 +286,11 @@ InteractionPhase.prototype.rockDragmove = function(d) {
 		.attr('x', function(d) { return d.x+d.w*4/5 })
 		.attr('y', function(d) { return d.y+d.h*4/5 });
 	this.draggedRock.setXY(d.x, d.y);
+
 	this.displayUserFeedback();
+
+	this.activeRockCount = this.getRocksWithinWindow('#rockZone0', this.collection).length;
+	if (oldActiveRockCount !== this.activeRockCount) this.collectPhaseOneData(oldActiveRockCount < this.activeRockCount ? 'add' : 'remove');
 }
 
 InteractionPhase.prototype.rockDragend = function(d) {
@@ -590,7 +596,7 @@ InteractionPhase.prototype.collectPhaseOneData = function(action) {
 
 	dataRow.stimIndex = this.stimuli[this.currentStimulus].stimulusNum;
 
-	dataRow.rocks = codifyUserRockData(this.category.getRocksWithinWindow('#rockZone0', this.collection));
+	dataRow.rocks = codifyUserRockData(this.getRocksWithinWindow('#rockZone0', this.collection));
 	dataRow.action = action;
 	dataRow.accuracy = this.currentStateSatisfiesCategory;
 	dataRow.reaction = Date.now() - this.t1;

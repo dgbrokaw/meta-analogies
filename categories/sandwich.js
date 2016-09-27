@@ -4,36 +4,12 @@ var SandwichCategory = function(settings) {
 
 categories['sandwich'] = SandwichCategory;
 
-SandwichCategory.prototype.windowSatisfiesCategory = function(rockZoneID, collection) {
-	this.rocks = this.getRocksWithinWindow(rockZoneID, collection);
+SandwichCategory.prototype.windowSatisfiesCategory = function(rocksWithinWindow) {
+	this.rocks = rocksWithinWindow;
 	for (var i=0; i<this.rocks.length; i++) {
 		if (this.rockSatisfiesSandwichCategory(i)) return true;
 	}
 	return false;
-}
-
-SandwichCategory.prototype.getRocksWithinWindow = function(rockZoneID, collection) {
-	var allRocks = collection.getRocks();
-	var rocksWithinWindow = [];
-	var windowSpace = {};
-	var rockZone = d3.select(rockZoneID);
-	windowSpace.x1 = rockZone.attr('x'), windowSpace.y1 = rockZone.attr('y')
- ,windowSpace.x2 = windowSpace.x1+rockZone.attr('width'), windowSpace.y2 = windowSpace.y1+rockZone.attr('height');
-	for (var i=0; i<allRocks.length; i++) {
-		var rock = allRocks[i], rockSpace = {};
-		rockSpace.x1 = rock.x, rockSpace.y1 = rock.y, rockSpace.x2 = rock.x+rock.dimension, rockSpace.y2 = rock.y+rock.dimension;
-		if (rockSpaceIsWithinWindowSpace(rockSpace, windowSpace)) {
-			rocksWithinWindow.push(rock);
-		}
-	}
-	return rocksWithinWindow;
-}
-
-function rockSpaceIsWithinWindowSpace(rockSpace, windowSpace) {
-	return (windowSpace.x1<rockSpace.x1
-			 && windowSpace.y1<rockSpace.y1
-			 && rockSpace.x2<windowSpace.x2
-			 && rockSpace.y2<windowSpace.y2);
 }
 
 SandwichCategory.prototype.rockSatisfiesSandwichCategory = function(rockIDX) {
