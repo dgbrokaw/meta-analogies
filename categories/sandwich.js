@@ -46,7 +46,7 @@ SandwichCategory.prototype.rockSatisfiesSandwichCategory = function(rockIDX) {
 			   ,B_box = getCornersOf(B);
 			if (areIdentical(A, B) && enoughSpaceBetween(A_box, B_box, this.settings.smallRockDimension) && notOnExtremeDiagonal(A, B) && A.borderColor && B.borderColor && A.borderColor===B.borderColor) {
 				var rocksInRegion = this.findRocksInRegion(A, B, A_box, B_box);
-				if (rocksInRegion.length>0) return true; // satisfies = this.containsSandwich(A, rocksInRegion, B);
+				if (rocksInRegion.length>0 && this.noRocksOverlapBookends(A, B)) return true;
 			}
 		}
 	}
@@ -167,6 +167,12 @@ SandwichCategory.prototype.containsSandwich = function(A, rocks, B) {
 		}
 	}
 	return true;
+}
+
+SandwichCategory.prototype.noRocksOverlapBookends = function(A, B) {
+	return this.rocks.every(function(rock) {
+		return !(rock != A && rectOverlap(rock, A)) && !(rock != B && rectOverlap(rock, B))
+	});
 }
 
 function distanceBetweenRocks(A, B) {
