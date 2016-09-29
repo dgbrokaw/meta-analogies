@@ -37,7 +37,7 @@ InteractionPhase.defaultSettings = {
 , buttonWidth: 600
 , buttonText: 'new'
 
-, timeLimit: 0.5*60
+, timeLimit: 7*60
 }
 
 InteractionPhase.prototype.initSettings = function(settings) {
@@ -533,7 +533,7 @@ InteractionPhase.prototype.displayUserFeedback = function() {
 	var text_line1_position = [600, 50] //[this.board.positions[0][0][0], this.board.positions[0][0][1]]
 	  , text_line2_position = [600, 100]; //[this.board.positions[1][0][0], this.board.positions[1][0][1]];
 
-	if (this.category.windowSatisfiesCategory('#rockZone0', this.collection)) {
+	if (this.category.windowSatisfiesCategory(this.getRocksWithinWindow('#rockZone0', this.collection))) {
 		this.currentStateSatisfiesCategory = true;
 
 		this.board.setRockZoneStrokeColor('#rockZone0', this.board.settings.correctColor);
